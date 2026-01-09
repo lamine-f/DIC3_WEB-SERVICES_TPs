@@ -1,0 +1,29 @@
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+*.env.local
