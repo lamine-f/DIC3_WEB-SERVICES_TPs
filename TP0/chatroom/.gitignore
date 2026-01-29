@@ -36,3 +36,21 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### Logs ###
+*.log
+logs/
+
+### Temporary files ###
+*.tmp
+*.bak
+*.swp
+*~
+
+### Claude Code ###
+.claude/
