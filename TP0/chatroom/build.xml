@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="chatroom" default="compile" basedir=".">
+    <description>ChatRoom - Application de Chat Distribuée avec Java RMI</description>
+
+    <property name="src.api" location="src/api"/>
+    <property name="src.server" location="src/server"/>
+    <property name="src.client" location="src/client"/>
+    <property name="build" location="build"/>
+    <property name="build.api" location="${build}/api"/>
+    <property name="build.server" location="${build}/server"/>
+    <property name="build.client" location="${build}/client"/>
+    <property name="dist" location="dist"/>
+    <property name="java.version" value="21"/>
+
+    <target name="init">
+        <mkdir dir="${build.api}"/>
+        <mkdir dir="${build.server}"/>
+        <mkdir dir="${build.client}"/>
+        <mkdir dir="${dist}"/>
+    </target>
+
+    <target name="clean" description="Supprime les fichiers générés">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+    <target name="compile-api" depends="init" description="Compile le module API">
+        <javac srcdir="${src.api}" destdir="${build.api}"
+               includeantruntime="false"
+               encoding="UTF-8">
+        </javac>
+    </target>
+
+    <target name="compile-server" depends="compile-api" description="Compile le module Server">
+        <javac srcdir="${src.server}" destdir="${build.server}"
+               includeantruntime="false"
+               encoding="UTF-8">
+            <classpath>
+                <pathelement location="${build.api}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="compile-client" depends="compile-api" description="Compile le module Client">
+        <javac srcdir="${src.client}" destdir="${build.client}"
+               includeantruntime="false"
+               encoding="UTF-8">
+            <classpath>
+                <pathelement location="${build.api}"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="compile" depends="compile-api,compile-server,compile-client"
+            description="Compile tous les modules">
+    </target>
+
+    <target name="jar-api" depends="compile-api" description="Crée le JAR API">
+        <jar destfile="${dist}/chatroom-api.jar" basedir="${build.api}"/>
+    </target>
+
+    <target name="jar-server" depends="compile-server,jar-api" description="Crée le JAR Server">
+        <jar destfile="${dist}/chatroom-server.jar" basedir="${build.server}">
+            <manifest>
+                <attribute name="Main-Class" value="esp.dgi.dic3_2026.ServerApp"/>
+                <attribute name="Class-Path" value="chatroom-api.jar"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="jar-client" depends="compile-client,jar-api" description="Crée le JAR Client">
+        <jar destfile="${dist}/chatroom-client.jar" basedir="${build.client}">
+            <manifest>
+                <attribute name="Main-Class" value="esp.dgi.dic3_2026.ClientApp"/>
+                <attribute name="Class-Path" value="chatroom-api.jar"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="jar" depends="jar-api,jar-server,jar-client"
+            description="Crée tous les JARs">
+    </target>
+
+    <target name="run-server" depends="compile" description="Lance le serveur">
+        <java classname="esp.dgi.dic3_2026.ServerApp" fork="true">
+            <classpath>
+                <pathelement location="${build.api}"/>
+                <pathelement location="${build.server}"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="run-client" depends="compile" description="Lance le client">
+        <java classname="esp.dgi.dic3_2026.ClientApp" fork="true">
+            <classpath>
+                <pathelement location="${build.api}"/>
+                <pathelement location="${build.client}"/>
+            </classpath>
+        </java>
+    </target>
+
+</project>

@@ -6,29 +6,44 @@ Application de chat en temps réel utilisant Java RMI (Remote Method Invocation)
 
 ```
 chatroom/
-├── chatroom-api/      # Interfaces RMI partagées entre client et serveur
-├── chatroom-server/   # Implémentation du serveur RMI
-├── chatroom-client/   # Application cliente
-└── pom.xml            # POM parent Maven
+├── build.xml          # Fichier de build Ant
+├── src/
+│   ├── api/           # Interfaces RMI partagées
+│   ├── server/        # Implémentation du serveur RMI
+│   └── client/        # Application cliente
+├── build/             # Classes compilées (généré)
+└── dist/              # JARs (généré)
 ```
 
 ### Modules
 
-- **chatroom-api** : Contient les interfaces RMI (`ChatService`, `ChatClient`) utilisées pour la communication distante
-- **chatroom-server** : Serveur de chat qui gère les connexions clients et la diffusion des messages
-- **chatroom-client** : Interface utilisateur permettant de se connecter au chat et d'envoyer/recevoir des messages
+- **api** : Contient les interfaces RMI (`ChatRoom`, `MessageListener`) utilisées pour la communication distante
+- **server** : Serveur de chat qui gère les connexions clients et la diffusion des messages
+- **client** : Interface utilisateur Swing permettant de se connecter au chat et d'envoyer/recevoir des messages
 
 ## Prérequis
 
 - Java 21 ou supérieur
-- Maven 3.6+
+- Apache Ant
 
 ## Build
 
 Compiler l'ensemble du projet :
 
 ```bash
-mvn clean install
+ant compile
+```
+
+Créer les JARs :
+
+```bash
+ant jar
+```
+
+Nettoyer les fichiers générés :
+
+```bash
+ant clean
 ```
 
 ## Exécution
@@ -36,22 +51,30 @@ mvn clean install
 ### 1. Démarrer le Serveur
 
 ```bash
-cd chatroom-server
-mvn exec:java
+ant run-server
 ```
 
-Le serveur démarre et enregistre le service RMI sur le registre local.
+Le serveur démarre et enregistre le service RMI sur le registre local (port 1099).
 
 ### 2. Démarrer un Client
 
 Dans un nouveau terminal :
 
 ```bash
-cd chatroom-client
-mvn exec:java
+ant run-client
 ```
 
 Plusieurs clients peuvent se connecter simultanément au serveur.
+
+### Exécution via JARs
+
+Après `ant jar`, vous pouvez aussi exécuter directement :
+
+```bash
+cd dist
+java -jar chatroom-server.jar   # Terminal 1
+java -jar chatroom-client.jar   # Terminal 2
+```
 
 ## Architecture Technique
 
