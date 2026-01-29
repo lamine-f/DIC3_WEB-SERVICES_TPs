@@ -7,6 +7,13 @@
     <groupId>esp.dgi.dic3_2026</groupId>
     <artifactId>chatroom</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>chatroom-api</module>
+        <module>chatroom-server</module>
+        <module>chatroom-client</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

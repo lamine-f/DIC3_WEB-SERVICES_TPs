@@ -3,7 +3,7 @@ package esp.dgi.dic3_2026;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-public class ChatRoomUserApplication {
+public class ClientApp {
 
     static int PORT = 1099;
 
@@ -11,9 +11,9 @@ public class ChatRoomUserApplication {
         try {
             Registry registry = LocateRegistry.getRegistry(PORT);
             ChatRoom stub = (ChatRoom) registry.lookup("ChatRoomServer");
-            new ChatRoomMessagingUI(stub);
+            new ChatClient(stub);
             System.out.println("Client is running...");
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             System.err.println("Error in client: " + ex.getMessage());
         }
     }

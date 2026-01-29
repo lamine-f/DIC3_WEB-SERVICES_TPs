@@ -6,10 +6,10 @@ import java.awt.event.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-public class ChatRoomMessagingUI extends UnicastRemoteObject implements ChatRoomUser {
+public class ChatClient extends UnicastRemoteObject implements MessageListener {
 
     private final ChatRoom chatRoom;
-    private String pseudo = null;
+    private String username = null;
 
     private final String title = "Logiciel de discussion en ligne";
     private final JFrame window = new JFrame(title);
@@ -17,15 +17,15 @@ public class ChatRoomMessagingUI extends UnicastRemoteObject implements ChatRoom
     private final JTextField txtMessage = new JTextField();
     private final JButton btnSend = new JButton("Envoyer");
 
-    public ChatRoomMessagingUI(ChatRoom chatRoom) throws RemoteException {
+    public ChatClient(ChatRoom chatRoom) throws RemoteException {
         this.chatRoom = chatRoom;
         this.createIHM();
-        this.requestPseudo();
+        this.requestUsername();
     }
 
     public void createIHM() {
         // Assemblage des composants
-        JPanel panel = (JPanel)this.window.getContentPane();
+        JPanel panel = (JPanel) this.window.getContentPane();
         JScrollPane sclPane = new JScrollPane(txtOutput);
         panel.add(sclPane, BorderLayout.CENTER);
         JPanel southPanel = new JPanel(new BorderLayout());
@@ -52,31 +52,31 @@ public class ChatRoomMessagingUI extends UnicastRemoteObject implements ChatRoom
         });
 
         // Initialisation des attributs
-        this.txtOutput.setBackground(new Color(220,220,220));
+        this.txtOutput.setBackground(new Color(220, 220, 220));
         this.txtOutput.setEditable(false);
-        this.window.setSize(500,400);
+        this.window.setSize(500, 400);
         this.window.setVisible(true);
         this.txtMessage.requestFocus();
     }
 
-    public void requestPseudo() {
-        this.pseudo = JOptionPane.showInputDialog(
+    public void requestUsername() {
+        this.username = JOptionPane.showInputDialog(
                 this.window, "Entrez votre pseudo : ",
-                this.title,  JOptionPane.OK_OPTION
+                this.title, JOptionPane.OK_OPTION
         );
 
         try {
-            this.chatRoom.subscribe(this, this.pseudo);
-        }catch (Exception ex) {
+            this.chatRoom.subscribe(this, this.username);
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
 
-        if (this.pseudo == null) System.exit(0);
+        if (this.username == null) System.exit(0);
     }
 
     public void window_windowClosing(WindowEvent e) {
         try {
-            this.chatRoom.unsubscribe(this.pseudo);
+            this.chatRoom.unsubscribe(this.username);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -84,10 +84,10 @@ public class ChatRoomMessagingUI extends UnicastRemoteObject implements ChatRoom
     }
 
     public void btnSend_actionPerformed(ActionEvent e) {
-        this.txtOutput.append( String.format("Vous: %s\n", this.txtMessage.getText()) );
+        this.txtOutput.append(String.format("Vous: %s\n", this.txtMessage.getText()));
         try {
-            this.chatRoom.postMessage(pseudo, this.txtMessage.getText());
-        }catch (Exception ex) {
+            this.chatRoom.postMessage(username, this.txtMessage.getText());
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
         this.txtMessage.setText("");
@@ -95,7 +95,7 @@ public class ChatRoomMessagingUI extends UnicastRemoteObject implements ChatRoom
     }
 
     @Override
-    public void displayMessage(String pseudonym, String message) throws RemoteException {
-        this.txtOutput.append( String.format("%s: %s\n", pseudonym, message) );
+    public void displayMessage(String username, String message) throws RemoteException {
+        this.txtOutput.append(String.format("%s: %s\n", username, message));
     }
 }
