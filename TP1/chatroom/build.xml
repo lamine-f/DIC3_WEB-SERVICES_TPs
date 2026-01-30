@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="chatroom-xmlrpc" default="compile" basedir=".">
+    <description>TP1 - ChatRoom XML-RPC</description>
+
+    <property name="src.server" location="src/server"/>
+    <property name="src.client" location="src/client"/>
+    <property name="build" location="build"/>
+    <property name="build.server" location="${build}/server"/>
+    <property name="build.client" location="${build}/client"/>
+    <property name="lib" location="lib"/>
+
+    <path id="xmlrpc.classpath">
+        <fileset dir="${lib}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="init">
+        <mkdir dir="${build.server}"/>
+        <mkdir dir="${build.client}"/>
+    </target>
+
+    <target name="clean" description="Supprime les fichiers generes">
+        <delete dir="${build}"/>
+    </target>
+
+    <target name="compile-server" depends="init" description="Compile le serveur">
+        <javac srcdir="${src.server}" destdir="${build.server}"
+               includeantruntime="false"
+               encoding="UTF-8">
+            <classpath refid="xmlrpc.classpath"/>
+        </javac>
+    </target>
+
+    <target name="compile-client" depends="init" description="Compile le client">
+        <javac srcdir="${src.client}" destdir="${build.client}"
+               includeantruntime="false"
+               encoding="UTF-8">
+            <classpath refid="xmlrpc.classpath"/>
+        </javac>
+    </target>
+
+    <target name="compile" depends="compile-server,compile-client"
+            description="Compile tous les modules">
+    </target>
+
+    <target name="run-server" depends="compile-server" description="Lance le serveur">
+        <java classname="ServerApp" fork="true">
+            <classpath>
+                <pathelement location="${build.server}"/>
+                <path refid="xmlrpc.classpath"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="run-client" depends="compile-client" description="Lance le client">
+        <java classname="ClientApp" fork="true">
+            <classpath>
+                <pathelement location="${build.client}"/>
+                <path refid="xmlrpc.classpath"/>
+            </classpath>
+        </java>
+    </target>
+
+</project>
