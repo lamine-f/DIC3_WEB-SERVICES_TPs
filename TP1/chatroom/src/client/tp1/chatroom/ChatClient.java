@@ -1,3 +1,5 @@
+package tp1.chatroom;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -147,13 +149,14 @@ public class ChatClient {
         });
     }
 
-    public static class ClientHandler {
+    public static class ClientHandler implements MessageListener {
         private ChatClient client;
 
         public ClientHandler(ChatClient client) {
             this.client = client;
         }
 
+        @Override
         public boolean displayMessage(String username, String message) {
             client.appendMessage(username, message);
             return true;

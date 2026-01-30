@@ -3,7 +3,7 @@ import org.apache.xmlrpc.*;
 
 public class JavaClient {
 
-    static void test (XmlRpcClient server, Vector params) throws Exception {
+    static void test (XmlRpcClient server, Vector<Object> params) throws Exception {
         Object result = server.execute("sample.multiply", params);
         int sum = ((Integer) result).intValue();
         System.out.println("The multiplication is: " + sum);
@@ -12,7 +12,7 @@ public class JavaClient {
     public static void main(String[] args) {
         try {
             XmlRpcClient server = new XmlRpcClient("http://localhost/RPC2");
-            Vector params = new Vector();
+            Vector<Object> params = new Vector<>();
             params.addElement(new Integer(17));
             params.addElement(new Integer(13));
             Object result = server.execute("sample.sum", params);

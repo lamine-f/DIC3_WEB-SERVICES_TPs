@@ -1,13 +1,13 @@
-import java.util.HashMap;
-import java.util.Vector;
+package tp1.chatroom;
+
 import org.apache.xmlrpc.XmlRpcClient;
 
-public class ChatRoomServer {
+import java.util.HashMap;
+import java.util.Vector;
+
+public class ChatRoomServer implements ChatRoom {
 
     private final HashMap<String, Integer> subscribers = new HashMap<>();
-
-    public ChatRoomServer() {
-    }
 
     public boolean subscribe(String username, int clientPort) {
         if (subscribers.containsKey(username)) {

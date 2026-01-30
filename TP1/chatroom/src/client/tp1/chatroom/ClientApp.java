@@ -1,3 +1,5 @@
+package tp1.chatroom;
+
 import java.net.ServerSocket;
 
 public class ClientApp {

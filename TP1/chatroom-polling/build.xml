@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="chatroom-xmlrpc" default="compile" basedir=".">
-    <description>TP1 - ChatRoom XML-RPC</description>
+<project name="chatroom-polling" default="compile" basedir=".">
+    <description>TP1 - ChatRoom XML-RPC (Version Polling)</description>
 
     <property name="src.api" location="src/api"/>
     <property name="src.server" location="src/server"/>
@@ -61,7 +61,7 @@
     </target>
 
     <target name="run-server" depends="compile-server" description="Lance le serveur">
-        <java classname="tp1.chatroom.ServerApp" fork="true">
+        <java classname="tp1.chatroom_polling.ServerApp" fork="true">
             <classpath>
                 <pathelement location="${build.api}"/>
                 <pathelement location="${build.server}"/>
@@ -71,7 +71,7 @@
     </target>
 
     <target name="run-client" depends="compile-client" description="Lance le client">
-        <java classname="tp1.chatroom.ClientApp" fork="true">
+        <java classname="tp1.chatroom_polling.ClientApp" fork="true">
             <classpath>
                 <pathelement location="${build.api}"/>
                 <pathelement location="${build.client}"/>
