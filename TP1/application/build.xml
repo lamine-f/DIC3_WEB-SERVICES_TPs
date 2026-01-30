@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="xmlrpc-demo" default="compile" basedir=".">
+    <description>TP1 - XML-RPC Client-Server Demo</description>
+
+    <property name="src.server" location="src/server"/>
+    <property name="src.client" location="src/client"/>
+    <property name="build" location="build"/>
+    <property name="build.server" location="${build}/server"/>
+    <property name="build.client" location="${build}/client"/>
+    <property name="dist" location="dist"/>
+    <property name="lib" location="lib"/>
+
+    <path id="xmlrpc.classpath">
+        <fileset dir="${lib}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="init">
+        <mkdir dir="${build.server}"/>
+        <mkdir dir="${build.client}"/>
+        <mkdir dir="${dist}"/>
+    </target>
+
+    <target name="clean" description="Supprime les fichiers generes">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+
+    <target name="compile-server" depends="init" description="Compile le serveur">
+        <javac srcdir="${src.server}" destdir="${build.server}"
+               includeantruntime="false"
+               encoding="UTF-8">
+            <classpath refid="xmlrpc.classpath"/>
+        </javac>
+    </target>
+
+    <target name="compile-client" depends="init" description="Compile le client">
+        <javac srcdir="${src.client}" destdir="${build.client}"
+               includeantruntime="false"
+               encoding="UTF-8">
+            <classpath refid="xmlrpc.classpath"/>
+        </javac>
+    </target>
+
+    <target name="compile" depends="compile-server,compile-client"
+            description="Compile tous les modules">
+    </target>
+
+    <target name="jar-server" depends="compile-server" description="Cree le JAR Server">
+        <jar destfile="${dist}/xmlrpc-server.jar" basedir="${build.server}">
+            <manifest>
+                <attribute name="Main-Class" value="JavaServer"/>
+                <attribute name="Class-Path" value="../lib/xmlrpc-2.0.jar"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="jar-client" depends="compile-client" description="Cree le JAR Client">
+        <jar destfile="${dist}/xmlrpc-client.jar" basedir="${build.client}">
+            <manifest>
+                <attribute name="Main-Class" value="JavaClient"/>
+                <attribute name="Class-Path" value="../lib/xmlrpc-2.0.jar"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="jar" depends="jar-server,jar-client"
+            description="Cree tous les JARs">
+    </target>
+
+    <target name="run-server" depends="compile-server" description="Lance le serveur">
+        <java classname="JavaServer" fork="true">
+            <classpath>
+                <pathelement location="${build.server}"/>
+                <path refid="xmlrpc.classpath"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="run-client" depends="compile-client" description="Lance le client">
+        <java classname="JavaClient" fork="true">
+            <classpath>
+                <pathelement location="${build.client}"/>
+                <path refid="xmlrpc.classpath"/>
+            </classpath>
+        </java>
+    </target>
+
+</project>

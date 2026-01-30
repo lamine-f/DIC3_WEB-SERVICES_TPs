@@ -20,6 +20,9 @@ release.properties
 *.log
 hs_err_pid*
 
+# Keep dependency JARs
+!**/lib/*.jar
+
 # OS
 .DS_Store
 Thumbs.db
