@@ -8,7 +8,7 @@ import org.apache.xmlrpc.XmlRpcClient;
 
 public class ChatClient implements MessageListener {
 
-    private XmlRpcClient serverClient;
+    private final XmlRpcClient serverClient;
     private Thread pollingThread;
     private volatile boolean running = true;
     private String username = null;
@@ -19,22 +19,11 @@ public class ChatClient implements MessageListener {
     private final JTextField txtMessage = new JTextField();
     private final JButton btnSend = new JButton("Envoyer");
 
-    public ChatClient() {
-        this.connectToServer();
+    public ChatClient(XmlRpcClient serverClient) {
+        this.serverClient = serverClient;
         this.createIHM();
         this.requestUsername();
         this.displayMessages();
-    }
-
-    private void connectToServer() {
-        try {
-            serverClient = new XmlRpcClient("http://localhost:80/RPC2");
-            System.out.println("Connected to main server");
-        } catch (Exception e) {
-            System.err.println("Failed to connect to server: " + e);
-            e.printStackTrace();
-            System.exit(1);
-        }
     }
 
     public void createIHM() {

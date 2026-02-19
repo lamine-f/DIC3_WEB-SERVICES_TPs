@@ -8,7 +8,7 @@ public class JavaServer {
     public static void main(String[] args) {
         try {
             System.out.println("Attempting to start XML-RPC Server...");
-            WebServer server = new WebServer(80);
+            WebServer server = new WebServer(8888);
             // server.addHandler("sample", new XMLRPCHandler());
             server.addHandler("sample", new JavaServer());
             server.start();

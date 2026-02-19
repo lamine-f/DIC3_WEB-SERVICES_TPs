@@ -9,7 +9,7 @@ import org.apache.xmlrpc.WebServer;
 
 public class ChatClient {
 
-    private XmlRpcClient serverClient;
+    private final XmlRpcClient serverClient;
     private WebServer clientServer;
     private final int clientPort;
     private String username = null;
@@ -20,10 +20,10 @@ public class ChatClient {
     private final JTextField txtMessage = new JTextField();
     private final JButton btnSend = new JButton("Envoyer");
 
-    public ChatClient(int clientPort) {
+    public ChatClient(XmlRpcClient serverClient, int clientPort) {
         this.clientPort = clientPort;
+        this.serverClient = serverClient;
         this.startClientServer();
-        this.connectToServer();
         this.createIHM();
         this.requestUsername();
     }
@@ -33,7 +33,6 @@ public class ChatClient {
             clientServer = new WebServer(clientPort);
             clientServer.addHandler("client", new ClientHandler(this));
             clientServer.start();
-            System.out.println("Client XML-RPC server started on port " + clientPort);
         } catch (Exception e) {
             System.err.println("Failed to start client server: " + e);
             e.printStackTrace();
@@ -41,16 +40,6 @@ public class ChatClient {
         }
     }
 
-    private void connectToServer() {
-        try {
-            serverClient = new XmlRpcClient("http://localhost:80/RPC2");
-            System.out.println("Connected to main server");
-        } catch (Exception e) {
-            System.err.println("Failed to connect to server: " + e);
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
 
     public void createIHM() {
         JPanel panel = (JPanel) this.window.getContentPane();

@@ -11,7 +11,7 @@ public class JavaClient {
 
     public static void main(String[] args) {
         try {
-            XmlRpcClient server = new XmlRpcClient("http://localhost/RPC2");
+            XmlRpcClient server = new XmlRpcClient("http://localhost:8888/RPC2");
             Vector<Object> params = new Vector<>();
             params.addElement(new Integer(17));
             params.addElement(new Integer(13));
