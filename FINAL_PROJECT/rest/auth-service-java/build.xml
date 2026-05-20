@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="rest-auth-service-java" default="jar" basedir=".">
+    <description>FINAL_PROJECT - AuthService REST (JAX-RS Jersey + Grizzly)</description>
+
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="classes" location="${build}/classes"/>
+    <property name="dist" location="${build}/dist"/>
+    <property name="lib" location="lib"/>
+
+    <path id="jaxrs.classpath">
+        <fileset dir="${lib}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="init">
+        <mkdir dir="${classes}"/>
+        <mkdir dir="${dist}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" destdir="${classes}"
+               includeantruntime="false"
+               encoding="UTF-8"
+               release="17">
+            <classpath>
+                <path refid="jaxrs.classpath"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar destfile="${dist}/rest-auth-service.jar" basedir="${classes}">
+            <manifest>
+                <attribute name="Main-Class" value="esp.dgi.ws.rest.auth.server.Main"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run-server" depends="jar">
+        <java classname="esp.dgi.ws.rest.auth.server.Main" fork="true">
+            <classpath>
+                <pathelement location="${dist}/rest-auth-service.jar"/>
+                <path refid="jaxrs.classpath"/>
+            </classpath>
+        </java>
+    </target>
+</project>

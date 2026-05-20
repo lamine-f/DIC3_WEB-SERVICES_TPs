@@ -1,0 +1,15 @@
+# Variables d'environnement du projet
+.env
+*.env.local
+
+# Logs (tout service)
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db

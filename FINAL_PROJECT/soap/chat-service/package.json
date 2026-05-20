@@ -1,0 +1,15 @@
+{
+  "name": "soap-chat-service",
+  "version": "1.0.0",
+  "description": "ChatService SOAP (Node.js node-soap) — FINAL_PROJECT DIC3 2026",
+  "private": true,
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "soap": "^1.1.6",
+    "pg": "^8.13.0"
+  }
+}

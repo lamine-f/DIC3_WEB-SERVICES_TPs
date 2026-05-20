@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://chatroom.dic3/chat"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             targetNamespace="http://chatroom.dic3/chat"
+             name="ChatService">
+
+  <types>
+    <xsd:schema targetNamespace="http://chatroom.dic3/chat"
+                xmlns:tns="http://chatroom.dic3/chat"
+                elementFormDefault="unqualified">
+
+      <xsd:complexType name="RoomDTO">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:int"/>
+          <xsd:element name="name" type="xsd:string"/>
+          <xsd:element name="createdBy" type="xsd:int"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:complexType name="MessageDTO">
+        <xsd:sequence>
+          <xsd:element name="id" type="xsd:long"/>
+          <xsd:element name="roomId" type="xsd:int"/>
+          <xsd:element name="userId" type="xsd:int"/>
+          <xsd:element name="username" type="xsd:string"/>
+          <xsd:element name="content" type="xsd:string"/>
+          <xsd:element name="createdAt" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+
+      <xsd:element name="createRoom">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="token" type="xsd:string"/>
+            <xsd:element name="name" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="createRoomResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="room" type="tns:RoomDTO"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="listRooms">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="token" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="listRoomsResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="room" type="tns:RoomDTO" minOccurs="0" maxOccurs="unbounded"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="sendMessage">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="token" type="xsd:string"/>
+            <xsd:element name="roomId" type="xsd:int"/>
+            <xsd:element name="content" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="sendMessageResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="messageId" type="xsd:long"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="getMessages">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="token" type="xsd:string"/>
+            <xsd:element name="roomId" type="xsd:int"/>
+            <xsd:element name="sinceId" type="xsd:long"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getMessagesResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="message" type="tns:MessageDTO" minOccurs="0" maxOccurs="unbounded"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+
+      <xsd:element name="ChatFault">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="code" type="xsd:string"/>
+            <xsd:element name="message" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+  <message name="createRoomRequest"><part name="parameters" element="tns:createRoom"/></message>
+  <message name="createRoomReply"><part name="parameters" element="tns:createRoomResponse"/></message>
+  <message name="listRoomsRequest"><part name="parameters" element="tns:listRooms"/></message>
+  <message name="listRoomsReply"><part name="parameters" element="tns:listRoomsResponse"/></message>
+  <message name="sendMessageRequest"><part name="parameters" element="tns:sendMessage"/></message>
+  <message name="sendMessageReply"><part name="parameters" element="tns:sendMessageResponse"/></message>
+  <message name="getMessagesRequest"><part name="parameters" element="tns:getMessages"/></message>
+  <message name="getMessagesReply"><part name="parameters" element="tns:getMessagesResponse"/></message>
+  <message name="chatFault"><part name="parameters" element="tns:ChatFault"/></message>
+
+  <portType name="ChatServicePort">
+    <operation name="createRoom">
+      <input message="tns:createRoomRequest"/>
+      <output message="tns:createRoomReply"/>
+      <fault name="ChatFault" message="tns:chatFault"/>
+    </operation>
+    <operation name="listRooms">
+      <input message="tns:listRoomsRequest"/>
+      <output message="tns:listRoomsReply"/>
+      <fault name="ChatFault" message="tns:chatFault"/>
+    </operation>
+    <operation name="sendMessage">
+      <input message="tns:sendMessageRequest"/>
+      <output message="tns:sendMessageReply"/>
+      <fault name="ChatFault" message="tns:chatFault"/>
+    </operation>
+    <operation name="getMessages">
+      <input message="tns:getMessagesRequest"/>
+      <output message="tns:getMessagesReply"/>
+      <fault name="ChatFault" message="tns:chatFault"/>
+    </operation>
+  </portType>
+
+  <binding name="ChatServiceBinding" type="tns:ChatServicePort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="createRoom">
+      <soap:operation soapAction="createRoom"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="ChatFault"><soap:fault name="ChatFault" use="literal"/></fault>
+    </operation>
+    <operation name="listRooms">
+      <soap:operation soapAction="listRooms"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="ChatFault"><soap:fault name="ChatFault" use="literal"/></fault>
+    </operation>
+    <operation name="sendMessage">
+      <soap:operation soapAction="sendMessage"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="ChatFault"><soap:fault name="ChatFault" use="literal"/></fault>
+    </operation>
+    <operation name="getMessages">
+      <soap:operation soapAction="getMessages"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="ChatFault"><soap:fault name="ChatFault" use="literal"/></fault>
+    </operation>
+  </binding>
+
+  <service name="ChatService">
+    <port name="ChatServicePort" binding="tns:ChatServiceBinding">
+      <soap:address location="http://localhost:9002/chat"/>
+    </port>
+  </service>
+
+</definitions>

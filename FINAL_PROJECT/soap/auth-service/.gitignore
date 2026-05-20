@@ -1,0 +1,15 @@
+# Build Ant + IntelliJ
+build/
+out/
+target/
+
+# Jars téléchargés via mvn dependency:copy-dependencies
+# (re-générables avec ./run.sh)
+lib/
+
+# Compilés
+*.class
+*.jar
+
+# IDE
+*.iml

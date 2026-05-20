@@ -4,6 +4,9 @@
 *.ipr
 *.iws
 
+# IntelliJ output (TP0, TP1, FINAL_PROJECT)
+out/
+
 # Maven
 target/
 pom.xml.tag
@@ -12,21 +15,33 @@ pom.xml.versionsBackup
 pom.xml.next
 release.properties
 
-# Java
+# Java (les *.jar de TP1/lib/ restent versionnés, les lib/ de FINAL_PROJECT
+# sont ignorés par les .gitignore locaux des sous-services)
 *.class
-*.jar
-*.war
-*.ear
 *.log
 hs_err_pid*
 
-# Keep dependency JARs
-!**/lib/*.jar
+# Node / Python / PHP (présents dans FINAL_PROJECT)
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+vendor/
+
+# Ant build
+build/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Env
+# Env / secrets
 .env
 *.env.local
+*.env.*.local
+
+# Editeur
+*.swp
+*.swo
+*~

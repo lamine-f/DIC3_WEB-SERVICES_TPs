@@ -1,0 +1,12 @@
+# Composer
+vendor/
+composer.phar
+
+# PHPUnit
+.phpunit.result.cache
+
+# IDE
+*.iml
+
+# Logs PHP
+*.log

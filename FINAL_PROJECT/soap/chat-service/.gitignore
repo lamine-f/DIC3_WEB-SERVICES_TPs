@@ -1,0 +1,15 @@
+# Dépendances Node
+node_modules/
+
+# Logs npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Lockfiles intermédiaires
+*.tgz
+.npm/
+
+# IDE
+*.iml
