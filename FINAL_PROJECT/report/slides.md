@@ -222,7 +222,7 @@ Le navigateur interroge le serveur toutes les **1,5 secondes** et utilise un cur
 </div>
 <div>
 
-![](figures/plantuml/sequence-polling.png)
+![](figures/plantuml/sequence-polling-simple.png)
 
 </div>
 </div>

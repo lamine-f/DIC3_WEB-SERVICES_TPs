@@ -1,0 +1,40 @@
+@startuml sequence-polling-simple
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Helvetica"
+
+title Séquence du polling côté navigateur
+
+participant "Navigateur" as nav
+participant "Frontend" as front
+participant "ChatService" as chat
+database "Stockage\ndes messages" as db
+
+note over nav
+  Curseur local :
+  sinceId = 0
+end note
+
+loop toutes les 1,5 secondes
+  nav -> front : demande les messages\ndepuis sinceId
+  front -> chat : getMessages(roomId, sinceId)
+  chat -> db : récupère les messages\nplus récents que sinceId
+  db --> chat : 0..N nouveaux messages
+  chat --> front : liste des messages
+  front --> nav : messages récents
+
+  alt il y a des nouveaux messages
+    nav -> nav : ajoute à l'écran\nsinceId = max(sinceId, id)
+  else aucun nouveau
+    nav -> nav : ne fait rien
+  end
+end
+
+note over nav, db
+  Le curseur sinceId est un identifiant
+  monotone : il garantit que le navigateur
+  ne saute jamais un message, même si
+  les serveurs ont des horloges décalées.
+end note
+
+@enduml
