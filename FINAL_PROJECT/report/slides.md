@@ -91,7 +91,7 @@ style: |
     flex: 1;
   }
   .two-col img {
-    max-height: 70vh;
+    max-height: 80vh;
     max-width: 100%;
     margin: 0;
   }

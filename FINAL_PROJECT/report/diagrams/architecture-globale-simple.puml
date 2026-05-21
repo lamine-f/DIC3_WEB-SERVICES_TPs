@@ -3,45 +3,36 @@
 skinparam backgroundColor #FFFFFF
 skinparam componentStyle rectangle
 skinparam defaultFontName "Helvetica"
+skinparam ranksep 30
+skinparam nodesep 25
 
 actor "Utilisateur" as user
 
-package "Couche présentation" {
-  [Frontend\n(port 8000)] as frontend
-}
+[Frontend\n(port 8000)] as frontend
 
-package "Sélection du backend" {
-  node "Fabrique de client" as factory
-}
+node "Fabrique de client" as factory
 
 package "Phase 1 : SOAP" #LightBlue {
-  [AuthService\n(port 9001)] as authSoap
   [ChatService\n(port 9002)] as chatSoap
+  [AuthService\n(port 9001)] as authSoap
+  chatSoap -[hidden]r- authSoap
 }
 
 package "Phase 2 : REST" #LightGreen {
-  [AuthService\n(port 8081)] as authRest
   [ChatService\n(port 8082)] as chatRest
+  [AuthService\n(port 8081)] as authRest
+  chatRest -[hidden]r- authRest
 }
 
-database "Base de données\n(PostgreSQL)" as pg {
-  frame "Bases isolées par phase" {
-    [chatroom_auth_soap]
-    [chatroom_chat_soap]
-    [chatroom_auth_rest]
-    [chatroom_chat_rest]
-  }
-}
+database "Base de données\n(4 bases isolées par phase)" as pg
 
 user --> frontend : HTTP
 frontend --> factory
-factory --> authSoap : si phase SOAP
-factory --> chatSoap : si phase SOAP
-factory --> authRest : si phase REST
-factory --> chatRest : si phase REST
+factory --> chatSoap : si SOAP
+factory --> chatRest : si REST
 
-chatSoap --> authSoap : validation\ndu jeton
-chatRest --> authRest : validation\ndu jeton
+chatSoap --> authSoap : valide\nle jeton
+chatRest --> authRest : valide\nle jeton
 
 authSoap --> pg
 chatSoap --> pg
