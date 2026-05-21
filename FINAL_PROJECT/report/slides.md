@@ -323,26 +323,16 @@ Codes d'erreur : `INVALID_CREDENTIALS`, `USER_ALREADY_EXISTS`, `INVALID_TOKEN`
 
 ---
 
-# Le contrat WSDL
+# Nos deux WSDL
 
-<div class="two-col">
-<div>
+Chaque service SOAP du projet expose son WSDL ; voici les opérations qu'il rend disponibles.
 
-Le WSDL du `ChatService` se décompose en **cinq sections imbriquées**, du vocabulaire métier jusqu'à l'URL.
-
-</div>
-<div>
-
-| Section | Contenu dans notre projet |
+| `AuthService` — `http://localhost:9001/auth` | `ChatService` — `http://localhost:9002/chat` |
 |---|---|
-| `<types>` | `RoomDTO`, `MessageDTO` |
-| `<message>` | `createRoomRequest`, `chatFault` |
-| `<portType>` | `ChatServicePort` : 4 opérations |
-| `<binding>` | SOAP sur HTTP, document/literal |
-| `<service>` | `http://localhost:9002/chat` |
-
-</div>
-</div>
+| `register(username, password)` | `createRoom(token, name)` |
+| `login(username, password)` | `listRooms(token)` |
+| `logout(token)` | `sendMessage(token, roomId, content)` |
+| `validateToken(token)` | `getMessages(token, roomId, sinceId)` |
 
 ---
 
