@@ -229,15 +229,25 @@ La vue interroge le serveur toutes les **1,5 secondes** et utilise un curseur `s
 
 ---
 
-# Stack technique par bloc
+# Stack technique
 
-| Bloc | Phase SOAP | Phase REST |
-|---|---|---|
-| Frontend | PHP 8.2 (SoapClient) | PHP 8.2 (cURL) |
-| AuthService | Java 21 + JAX-WS Metro | Java 21 + Jersey + Grizzly |
-| ChatService | Node.js 20 + node-soap | Python 3.12 + Flask |
-| BD | PostgreSQL 16 (2 bases) | PostgreSQL 16 (2 bases) |
-| Sécurité | bcrypt (cost 10) | bcrypt (cost 10) |
+<div class="two-col">
+<div>
+
+- **PHP 8.2** côté frontend
+- **Java 21** pour les deux AuthService
+- **Node.js 20** pour le ChatService SOAP
+- **Python 3.12** pour le ChatService REST
+- **PostgreSQL 16** pour les quatre bases
+- **bcrypt** pour les mots de passe
+
+</div>
+<div>
+
+![](figures/plantuml/architecture-stack.png)
+
+</div>
+</div>
 
 ---
 

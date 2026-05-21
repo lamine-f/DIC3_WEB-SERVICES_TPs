@@ -1,0 +1,56 @@
+@startuml architecture-stack
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam defaultFontName "Helvetica"
+skinparam ranksep 30
+skinparam nodesep 25
+
+' Sprites des technologies (DevIcons via tupadr3/plantuml-icon-font-sprites)
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons2
+!include DEVICONS/php.puml
+!include DEVICONS/java.puml
+!include DEVICONS/nodejs.puml
+!include DEVICONS/python.puml
+!include DEVICONS/postgresql.puml
+
+actor "Utilisateur" as user
+
+[<$php>\nFrontend\nPHP 8.2] as frontend
+
+node "Fabrique de client" as factory
+
+package "Phase 1 : SOAP" #LightBlue {
+  [<$nodejs>\nChatService\nNode.js + node-soap] as chatSoap
+  [<$java>\nAuthService\nJava + JAX-WS Metro] as authSoap
+  chatSoap -right-> authSoap : valide\nle jeton
+}
+
+package "Phase 2 : REST" #LightGreen {
+  [<$python>\nChatService\nPython + Flask] as chatRest
+  [<$java>\nAuthService\nJava + Jersey] as authRest
+  chatRest -right-> authRest : valide\nle jeton
+}
+
+package "Bases de données" {
+  package "SOAP" #LightBlue {
+    database "<$postgresql>\nauth_soap" as authSoapDb
+    database "<$postgresql>\nchat_soap" as chatSoapDb
+  }
+  package "REST" #LightGreen {
+    database "<$postgresql>\nauth_rest" as authRestDb
+    database "<$postgresql>\nchat_rest" as chatRestDb
+  }
+}
+
+user --> frontend
+frontend --> factory
+factory --> chatSoap : si SOAP
+factory --> chatRest : si REST
+
+authSoap --> authSoapDb
+chatSoap --> chatSoapDb
+authRest --> authRestDb
+chatRest --> chatRestDb
+
+@enduml
