@@ -234,7 +234,8 @@ La vue interroge le serveur toutes les **1,5 secondes** et utilise un curseur `s
 <div class="two-col">
 <div>
 
-- **PHP 8.2** côté frontend (SoapClient + cURL)
+- **PHP 8.2** côté frontend
+- **SoapClient** et **cURL** dans la fabrique de client
 - **Java 21** pour les deux AuthService
 - **Node.js 20** pour le ChatService SOAP
 - **Python 3.12** pour le ChatService REST
