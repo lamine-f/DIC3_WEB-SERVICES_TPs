@@ -191,7 +191,7 @@ Le cas pratique du cours : une chatroom en SOAP et en REST.
 
 ---
 
-# Modèle conceptuel de données
+# Structuration des données
 
 <div class="two-col">
 <div>
