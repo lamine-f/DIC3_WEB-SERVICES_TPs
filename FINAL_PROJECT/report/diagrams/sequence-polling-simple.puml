@@ -24,7 +24,7 @@ loop toutes les 1,5 secondes
   front --> nav : messages récents
 
   alt il y a des nouveaux messages
-    nav -> nav : affiche les messages\navance le curseur
+    nav -> nav : présente les messages\navance le curseur
   else aucun nouveau
     nav -> nav : ne fait rien
   end
