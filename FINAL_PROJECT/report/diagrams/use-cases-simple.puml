@@ -2,7 +2,6 @@
 !theme plain
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName "Helvetica"
-skinparam actorStyle hollow
 
 left to right direction
 
