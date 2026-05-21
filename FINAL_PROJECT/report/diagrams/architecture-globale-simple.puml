@@ -24,16 +24,25 @@ package "Phase 2 : REST" #LightGreen {
   chatRest -right-> authRest : valide\nle jeton
 }
 
-database "Base de données\n(4 bases isolées par phase)" as pg
+package "Bases de données" {
+  package "SOAP" #LightBlue {
+    database "auth_soap" as authSoapDb
+    database "chat_soap" as chatSoapDb
+  }
+  package "REST" #LightGreen {
+    database "auth_rest" as authRestDb
+    database "chat_rest" as chatRestDb
+  }
+}
 
 user --> frontend
 frontend --> factory
 factory --> chatSoap : si SOAP
 factory --> chatRest : si REST
 
-authSoap --> pg
-chatSoap --> pg
-authRest --> pg
-chatRest --> pg
+authSoap --> authSoapDb
+chatSoap --> chatSoapDb
+authRest --> authRestDb
+chatRest --> chatRestDb
 
 @enduml
