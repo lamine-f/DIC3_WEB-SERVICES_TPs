@@ -196,11 +196,9 @@ Le cas pratique du cours : une chatroom en SOAP et en REST.
 <div class="two-col">
 <div>
 
-- Quatre entités principales
-- Deux sphères distinctes : authentification et discussion
-- Bases physiquement isolées par phase
-- Identifiants monotones pour le polling
-- Champ `username` dénormalisé dans les messages
+## Comment garantir l'intégrité sans clé étrangère ?
+
+Les deux bases d'un même backend sont **physiquement isolées**. PostgreSQL n'autorise pas de clé étrangère inter-base.
 
 </div>
 <div>
@@ -209,17 +207,6 @@ Le cas pratique du cours : une chatroom en SOAP et en REST.
 
 </div>
 </div>
-
----
-
-<!-- _class: center -->
-
-# Comment garantir l'intégrité
-
-# sans clé étrangère ?
-
-Les deux bases d'un même backend sont **physiquement isolées**.
-PostgreSQL n'autorise pas de FK inter-base.
 
 ---
 
