@@ -258,7 +258,7 @@ La vue interroge le serveur toutes les **1,5 secondes** et utilise un curseur `s
 
 # Communication
 
-## Comment les services dialoguent
+Comment les services dialoguent
 
 ---
 
