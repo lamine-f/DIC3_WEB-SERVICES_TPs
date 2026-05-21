@@ -1,0 +1,47 @@
+@startuml sequence-sendmessage-soap
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+title Séquence de l'opération sendMessage en phase SOAP
+
+actor "Utilisateur\n(alice)" as user
+participant "chat.js\n(navigateur)" as js
+participant "api-proxy.php" as proxy
+participant "SoapBackendClient" as adapter
+participant "PHP SoapClient" as soap
+participant "ChatService\n(Node node-soap)" as node
+participant "authClient.js\n(SOAP sortant)" as authclient
+participant "AuthService\n(Java JAX-WS Metro)" as java
+database "auth_soap" as authdb
+database "chat_soap" as chatdb
+
+user -> js : tape "Salut Bob !" + Entree
+js -> proxy : POST ?action=sendMessage\n+ token
+proxy -> adapter : sendMessage(token, roomId, content)
+adapter -> soap : __soapCall('sendMessage', [token, roomId, content])
+soap -> node : POST /chat\n<soap:Envelope>\n  <chat:sendMessage>...
+
+node -> authclient : validateToken(token)
+authclient -> java : POST /auth\n<soap:Envelope>\n  <auth:validateToken>...
+java -> authdb : SELECT u.id, u.username\nFROM sessions s JOIN users u\nWHERE s.token = ?
+authdb --> java : (7, "alice")
+java --> authclient : <soap:Envelope>\n  <auth:validateTokenResponse>\n    <return><userId>7</userId>\n            <username>alice</username>
+authclient --> node : {userId: 7, username: "alice"}
+
+note over node #FFFFCC
+  Composition de services :
+  ChatService a obtenu l'identité
+  par appel SOAP sortant avant
+  toute écriture en base.
+end note
+
+node -> chatdb : INSERT INTO messages\n(room_id, user_id, username, content)\nVALUES (1, 7, "alice", "Salut Bob !")
+chatdb --> node : message_id = 42
+
+node --> soap : <soap:Envelope>\n  <chat:sendMessageResponse>\n    <messageId>42</messageId>
+soap --> adapter : 42
+adapter --> proxy : 42
+proxy --> js : OK
+js -> js : append au DOM\nupdate sinceId = max(sinceId, 42)
+
+@enduml

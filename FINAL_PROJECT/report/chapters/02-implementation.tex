@@ -92,7 +92,16 @@ Les huit opérations métier sont déclarées par l'interface \texttt{ClientInte
 
 \subsection{Séquences d'exécution}
 
-La \figref{sequence-sendmessage-rest} illustre le flux complet d'un envoi de message en phase REST, depuis le navigateur jusqu'à l'insertion en base, en passant par le middleware d'authentification et l'appel inter-service vers Jersey. La composition de services y est observable directement.
+Pour rendre tangible le comportement réel des deux phases, nous présentons deux séquences correspondant à la même opération métier : l'envoi d'un message. La \figref{sequence-sendmessage-soap} retrace le flux en phase SOAP. Le navigateur transmet la requête au frontend PHP, qui passe par son adaptateur \texttt{SoapBackendClient}. L'enveloppe SOAP atteint le service Node, lequel délègue immédiatement la validation du jeton au service Java par un appel SOAP sortant avant de procéder à l'insertion en base.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/sequence-sendmessage-soap.png}
+  \caption{Séquence d'un envoi de message en phase SOAP.}
+  \label{fig:sequence-sendmessage-soap}
+\end{figure}
+
+La \figref{sequence-sendmessage-rest} montre le même scénario en phase REST. Le flux est structurellement identique mais le protocole change : la requête est portée par HTTP avec en-tête \op{Authorization: Bearer}, et la validation du jeton se fait par un \op{GET /validate} vers le service Java Jersey. La composition de services reste observable.
 
 \begin{figure}[H]
   \centering
