@@ -123,7 +123,7 @@ footer: 'Chatroom SOAP + REST — ESP DGI 2026'
 
 <div class="meta">
 
-Mouhamed Lamine Faye Zeitune
+Groupe 3
 École Supérieure Polytechnique — DGI
 Cours Web Services — DIC3 — Mai 2026
 
