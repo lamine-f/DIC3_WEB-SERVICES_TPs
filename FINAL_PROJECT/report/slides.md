@@ -218,7 +218,20 @@ Les deux bases d'un même backend sont **physiquement isolées**. PostgreSQL n'a
 
 # Polling côté navigateur
 
+<div class="two-col">
+<div>
+
+## Comment livrer les nouveaux messages en temps réel ?
+
+Le navigateur interroge le serveur toutes les **1,5 secondes** et utilise un curseur `sinceId` monotone pour ne recevoir que les messages plus récents.
+
+</div>
+<div>
+
 ![](figures/plantuml/sequence-polling.png)
+
+</div>
+</div>
 
 ---
 
