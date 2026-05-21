@@ -81,6 +81,28 @@ style: |
     color: #555;
     font-style: italic;
   }
+  .two-col {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    height: 100%;
+  }
+  .two-col > div {
+    flex: 1;
+  }
+  .two-col img {
+    max-height: 70vh;
+    max-width: 100%;
+    margin: 0;
+  }
+  .two-col ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  .two-col ul li {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+  }
   footer {
     color: #888;
     font-size: 0.65em;
@@ -120,41 +142,48 @@ Cours Web Services — DIC3 — Mai 2026
 
 ---
 
-# Sujet du projet
+# Sujet
 
-Une chatroom textuelle multi-utilisateurs implémentée **deux fois** sur le même cas métier :
-
-- **Phase 1** en SOAP (Java JAX-WS Metro + Node.js node-soap)
-- **Phase 2** en REST (Java Jersey + Python Flask)
-
-Un même frontend PHP consomme les deux backends grâce au pattern **Port et Adaptateurs**, sélectionné par variable d'environnement.
-
-> L'objectif est de comparer concrètement les deux paradigmes sur un cas identique.
+Le cas pratique du cours : une chatroom en SOAP et en REST.
 
 ---
 
-# Fonctionnalités attendues
+# Qui fait quoi
 
-| AuthService | ChatService |
-|---|---|
-| `register` (création de compte) | `createRoom` (création de salon) |
-| `login` (jeton de session) | `listRooms` (lister les salons) |
-| `logout` (invalidation) | `sendMessage` (publier) |
-| `validateToken` (contrôle interne) | `getMessages` (polling) |
+<div class="two-col">
+<div>
 
-Huit opérations métier au total, réparties en deux services autonomes.
+- S'inscrire
+- Se connecter
+- Créer ou rejoindre un salon
+- Envoyer un message
+- Voir les messages des autres en temps réel
+- Se déconnecter
+
+</div>
+<div>
+
+![](figures/plantuml/use-cases-simple.png)
+
+</div>
+</div>
 
 ---
 
-# Cas d'utilisation
+# Architecture
 
-![](figures/plantuml/use-cases.png)
+<div class="two-col">
+<div>
 
----
+Pour répondre à cette problématique, nous partons sur une architecture comme celle-ci, où un même frontend dialogue avec deux jeux de services backend selon le protocole choisi.
 
-# Architecture globale
+</div>
+<div>
 
-![](figures/plantuml/architecture-globale.png)
+![](figures/plantuml/architecture-globale-simple.png)
+
+</div>
+</div>
 
 ---
 

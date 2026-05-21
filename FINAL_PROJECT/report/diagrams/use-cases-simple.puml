@@ -1,0 +1,31 @@
+@startuml use-cases-simple
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Helvetica"
+skinparam actorStyle awesome
+
+left to right direction
+
+actor "Visiteur" as visitor
+actor "Utilisateur\nauthentifié" as user
+
+user --|> visitor
+
+usecase "S'inscrire" as UC_register
+usecase "Se connecter" as UC_login
+usecase "Se déconnecter" as UC_logout
+usecase "Lister les salons" as UC_listRooms
+usecase "Créer un salon" as UC_createRoom
+usecase "Envoyer un message" as UC_sendMsg
+usecase "Lire les messages" as UC_getMsgs
+
+visitor --> UC_register
+visitor --> UC_login
+
+user --> UC_logout
+user --> UC_listRooms
+user --> UC_createRoom
+user --> UC_sendMsg
+user --> UC_getMsgs
+
+@enduml
