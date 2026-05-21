@@ -262,19 +262,87 @@ Comment les services dialoguent
 
 ---
 
-# SOAP : le contrat WSDL
+# SOAP : zoom sur l'architecture
 
-Un WSDL décrit publiquement un service SOAP en **cinq sections imbriquées** :
+<div class="two-col">
+<div>
 
-| Section | Rôle |
+- Contrat **WSDL** décrivant les opérations
+- Échanges en **enveloppes XML**
+- Style **document/literal**
+- Fautes structurées (`<soap:Fault>`)
+- Génération auto des stubs côté PHP et Node
+
+</div>
+<div>
+
+![](figures/plantuml/architecture-zoom-soap.png)
+
+</div>
+</div>
+
+---
+
+# Une enveloppe SOAP en pratique
+
+<div class="two-col">
+<div>
+
+**Requête `login`**
+
+```xml
+<soap:Envelope>
+  <soap:Body>
+    <auth:login>
+      <username>alice</username>
+      <password>secret</password>
+    </auth:login>
+  </soap:Body>
+</soap:Envelope>
+```
+
+</div>
+<div>
+
+**Réponse**
+
+```xml
+<soap:Envelope>
+  <soap:Body>
+    <auth:loginResponse>
+      <return>abc123…</return>
+    </auth:loginResponse>
+  </soap:Body>
+</soap:Envelope>
+```
+
+Codes d'erreur : `INVALID_CREDENTIALS`, `USER_ALREADY_EXISTS`, `INVALID_TOKEN`
+
+</div>
+</div>
+
+---
+
+# Le contrat WSDL
+
+<div class="two-col">
+<div>
+
+Le WSDL du `ChatService` se décompose en **cinq sections imbriquées**, du vocabulaire métier jusqu'à l'URL.
+
+</div>
+<div>
+
+| Section | Contenu dans notre projet |
 |---|---|
-| `<types>` | dictionnaire XSD des structures (DTOs) |
-| `<message>` | regroupement logique des entrées et sorties |
-| `<portType>` | interface abstraite : opérations + entrées + sorties + fautes |
-| `<binding>` | protocole concret : SOAP sur HTTP, document/literal |
-| `<service>` | adresse réelle de l'endpoint (URL) |
+| `<types>` | `RoomDTO`, `MessageDTO` |
+| `<message>` | `createRoomRequest`, `chatFault` |
+| `<portType>` | `ChatServicePort` : 4 opérations |
+| `<binding>` | SOAP sur HTTP, document/literal |
+| `<service>` | `http://localhost:9002/chat` |
 
-Un client SOAP **génère ses stubs automatiquement** à partir du WSDL.
+</div>
+</div>
 
 ---
 
@@ -286,26 +354,103 @@ Un client SOAP **génère ses stubs automatiquement** à partir du WSDL.
 
 # SoapUI en action
 
-![h:480](figures/soapui/soapui-runner.png)
+<div class="two-col">
+<div>
 
-Projet SoapUI : **14 TestCases**, 6 Property Transfers, 23 assertions.
-Test du flux complet avec validation inter-service.
+- Projet prêt à importer (`docs/soapui/`)
+- **14 cas de test** chaînés par Property Transfers
+- **23 assertions** vérifiées automatiquement
+- Inspection du **XML brut** (onglet Raw)
+
+</div>
+<div>
+
+![](figures/soapui/soapui-runner.png)
+
+</div>
+</div>
 
 ---
 
-# REST : principes
+# REST : zoom sur l'architecture
 
-- **Ressources** identifiées par des URI (`/rooms`, `/rooms/{id}/messages`)
-- **Verbes HTTP** : `POST` créer, `GET` lire, `DELETE` supprimer
-- **Codes de statut** : 200, 201, 401, 404, 409
-- **Authentification** : en-tête `Authorization: Bearer <token>`
-- **Négociation de contenu** : un même endpoint sert JSON ou XML selon `Accept`
+<div class="two-col">
+<div>
 
-```http
-GET /rooms HTTP/1.1
-Authorization: Bearer abc...
-Accept: application/xml
+- Ressources `/rooms`, `/rooms/{id}/messages`
+- Verbes HTTP : `GET`, `POST`
+- Auth par en-tête `Authorization: Bearer <token>`
+- Négociation **JSON ou XML** via `Accept`
+- Pas d'état conversationnel
+
+</div>
+<div>
+
+![](figures/plantuml/architecture-zoom-rest.png)
+
+</div>
+</div>
+
+---
+
+# Nos endpoints REST en pratique
+
+Le projet expose **huit endpoints métier**, répartis entre les deux services.
+
+| Verbe + chemin | Service | Code OK |
+|---|---|---|
+| `POST /register` | AuthService | 200 |
+| `POST /login` | AuthService | 200 |
+| `GET /validate` | AuthService | 200 |
+| `POST /logout` | AuthService | 204 |
+| `GET /rooms` | ChatService | 200 |
+| `POST /rooms` | ChatService | 201 |
+| `GET /rooms/{id}/messages` | ChatService | 200 |
+| `POST /rooms/{id}/messages` | ChatService | 201 |
+
+---
+
+# Négociation de contenu en action
+
+<div class="two-col">
+<div>
+
+**Même requête, format JSON**
+
+```bash
+curl -H 'Accept: application/json' \
+     http://localhost:8082/rooms
 ```
+
+```json
+{"rooms": [
+  {"id": 1, "name": "general"}
+]}
+```
+
+</div>
+<div>
+
+**Même requête, format XML**
+
+```bash
+curl -H 'Accept: application/xml' \
+     http://localhost:8082/rooms
+```
+
+```xml
+<response>
+  <rooms>
+    <room>
+      <id>1</id>
+      <name>general</name>
+    </room>
+  </rooms>
+</response>
+```
+
+</div>
+</div>
 
 ---
 
@@ -317,10 +462,21 @@ Accept: application/xml
 
 # Postman en action
 
-![h:460](figures/postman/postman-runner-result.png)
+<div class="two-col">
+<div>
 
-Collection Postman : **28 requêtes** organisées par service.
-Chaque opération existe en **JSON et en XML**, exécutables en boucle via le Collection Runner.
+- Collection organisée par service
+- **28 requêtes** : JSON et XML pour chaque opération
+- Property Transfers automatiques (token, roomId, sinceId)
+- Rejouable via Runner ou **Newman CLI**
+
+</div>
+<div>
+
+![](figures/postman/postman-runner-result.png)
+
+</div>
+</div>
 
 ---
 

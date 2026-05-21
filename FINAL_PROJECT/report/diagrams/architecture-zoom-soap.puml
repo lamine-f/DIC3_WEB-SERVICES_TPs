@@ -1,0 +1,50 @@
+@startuml architecture-zoom-soap
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam defaultFontName "Helvetica"
+skinparam ranksep 30
+skinparam nodesep 25
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons2
+!include DEVICONS/php.puml
+!include DEVICONS/java.puml
+!include DEVICONS/nodejs.puml
+!include DEVICONS/postgresql.puml
+
+actor "Utilisateur" as user
+
+[<$php>\nFrontend] as frontend
+
+node "Fabrique\nde client\n(SoapClient)" as factory
+
+package "Phase 1 : SOAP" #LightBlue {
+  [<$nodejs>\nChatService] as chatSoap
+  [<$java>\nAuthService] as authSoap
+  chatSoap -right-> authSoap : valide\nle jeton
+}
+
+package "Phase 2 : REST" #DDDDDD {
+  [ChatService] as chatRest
+  [AuthService] as authRest
+}
+
+package "Bases de données" {
+  package "SOAP" #LightBlue {
+    database "<$postgresql>\nauth_soap" as authSoapDb
+    database "<$postgresql>\nchat_soap" as chatSoapDb
+  }
+  package "REST" #DDDDDD {
+    database "auth_rest" as authRestDb
+    database "chat_rest" as chatRestDb
+  }
+}
+
+user --> frontend
+frontend --> factory
+factory --> chatSoap : enveloppe SOAP
+
+authSoap --> authSoapDb
+chatSoap --> chatSoapDb
+
+@enduml

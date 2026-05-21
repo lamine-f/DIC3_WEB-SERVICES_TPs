@@ -1,0 +1,50 @@
+@startuml architecture-zoom-rest
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam defaultFontName "Helvetica"
+skinparam ranksep 30
+skinparam nodesep 25
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons2
+!include DEVICONS/php.puml
+!include DEVICONS/java.puml
+!include DEVICONS/python.puml
+!include DEVICONS/postgresql.puml
+
+actor "Utilisateur" as user
+
+[<$php>\nFrontend] as frontend
+
+node "Fabrique\nde client\n(cURL)" as factory
+
+package "Phase 1 : SOAP" #DDDDDD {
+  [ChatService] as chatSoap
+  [AuthService] as authSoap
+}
+
+package "Phase 2 : REST" #LightGreen {
+  [<$python>\nChatService] as chatRest
+  [<$java>\nAuthService] as authRest
+  chatRest -right-> authRest : valide\nle jeton
+}
+
+package "Bases de données" {
+  package "SOAP" #DDDDDD {
+    database "auth_soap" as authSoapDb
+    database "chat_soap" as chatSoapDb
+  }
+  package "REST" #LightGreen {
+    database "<$postgresql>\nauth_rest" as authRestDb
+    database "<$postgresql>\nchat_rest" as chatRestDb
+  }
+}
+
+user --> frontend
+frontend --> factory
+factory --> chatRest : Authorization: Bearer
+
+authRest --> authRestDb
+chatRest --> chatRestDb
+
+@enduml
