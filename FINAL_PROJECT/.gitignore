@@ -13,3 +13,34 @@
 # OS
 .DS_Store
 Thumbs.db
+
+# =====================================================
+# Rapport LaTeX (report/)
+# =====================================================
+# Fichiers intermediaires de compilation LaTeX
+report/*.aux
+report/*.bbl
+report/*.bcf
+report/*.blg
+report/*.fdb_latexmk
+report/*.fls
+report/*.lof
+report/*.lot
+report/*.out
+report/*.run.xml
+report/*.synctex.gz
+report/*.toc
+report/chapters/*.aux
+
+# PDF compile (regenerable via `make`)
+# Commenter la ligne suivante si l'on souhaite versionner le PDF final
+report/main.pdf
+
+# Diagrammes PNG generes depuis les sources PlantUML (.puml)
+report/figures/plantuml/*.png
+
+# Backup de l'editeur
+*~
+*.bak
+*.swp
+*.swo

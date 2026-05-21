@@ -1,0 +1,86 @@
+\chapter{Cadre théorique et état de l'art}
+
+Avant de présenter notre réalisation, nous consacrons ce chapitre à la mise en perspective théorique des deux paradigmes étudiés. Cette étape est indispensable pour fonder les choix de conception que nous detaillons dans le chapitre suivant.
+
+\section{Les services Web : définition et enjeux}
+
+Un service Web désigné, au sens large, une fonctionnalite applicative accessible par le réseau au moyen d'un protocole standardisé. Le World Wide Web Consortium définit plus précisément un service Web comme un \emph{système logiciel concu pour permettre l'interaction interopérable de machine à machine sur un réseau}. Cette définition met en avant trois caracteristiques fondamentales : l'autonomie du service, l'interopérabilité multi-plateforme et la communication par messages structurés.
+
+L'intérêt des services Web ne tient pas à la nouveauté des principes invoqués mais à la convergence de standards ouverts. Cette convergence permet, pour la première fois à grande échelle, de faire dialoguer des systèmes écrits dans des langages différents, déployés sur des systèmes d'exploitation distincts, et appartenant parfois à des organisations concurrentes.
+
+\section{Le paradigme SOAP}
+
+\subsection{Origines et positionnement}
+
+Le protocole SOAP, initialement désigné par l'acronyme \emph{Simple Object Access Protocol}, a été proposé à la fin des années mille neuf cent quatre-vingt-dix. Sa version 1.2 est devenue une recommandation officielle du W3C en 2003 puis 2007 \citep{w3csoap2007}. Le standard répond à un besoin précis : échanger des messages XML entre systèmes hétérogènes en s'appuyant sur les protocoles de transport existants, principalement HTTP.
+
+\subsection{Structuré d'un message SOAP}
+
+Un message SOAP est encapsule dans une \emph{enveloppe} XML qui contient un en-tête optionnel et un corps obligatoire. Le corps transporte la représentation de l'appel de procédure distant ou la réponse correspondante. En cas d'erreur, le serveur retourne une \emph{Fault} structurée, comprenant un code, un message et éventuellement un détail. Cette uniformité des messages constitue l'une des forces du standard : un client SOAP correctement implémenté sait interpréter sans ambiguite les réponses d'un serveur SOAP conforme.
+
+\subsection{Le contrat WSDL}
+
+Chaque service SOAP est décrit par un document \emph{Web Services Description Language} (WSDL), spécifié également par le W3C \citep{w3cwsdl2001}. Ce contrat enumere les opérations exposées, le format précis de leurs paramètres d'entrée et de sortie, ainsi que les exceptions susceptibles d'être levees. La présence d'un contrat formel autorise la génération automatique de stubs clients dans la plupart des langages, ce qui simplifié l'intégration mais introduit un couplage fort entre client et serveur.
+
+\subsection{Approches de développement}
+
+Deux approches s'opposent dans la conception d'un service SOAP. L'approche \emph{contract-first} consiste à rédiger d'abord le WSDL puis à implémenter le service en s'appuyant sur ce contrat. Elle convient aux organisations qui doivent stabiliser un contrat avant le développement. L'approche \emph{code-first}, plus répandue dans les environnements modernes, part d'annotations dans le code source : c'est le compilateur ou l'outillage qui génère le WSDL. Notre réalisation illustre les deux : le service Java JAX-WS adopte l'approche code-first, tandis que le service Node.js part d'un WSDL écrit à la main.
+
+\section{Le paradigme REST}
+
+\subsection{Origines et principes architecturaux}
+
+L'acronyme REST signifie \emph{Representational State Transfer}. Ce style architectural a été décrit en 2000 par Roy Fielding dans sa thèse de doctorat \citep{fielding2000}, rédigée au moment où ce dernier participait à l'élaboration du standard HTTP/1.1. REST ne constitue pas un protocole au sens strict, mais un ensemble de contraintes architecturales : séparation client-serveur, absence d'état conversationnel, cachabilité des réponses, uniformité de l'interface, et architecture en couches.
+
+\subsection{Ressources et représentations}
+
+Le concept central de REST est celui de \emph{ressource}. Une ressource est une entité métier identifiée par un \emph{Uniform Resource Identifier} (URI) stable. Une même ressource peut être représentée dans plusieurs formats : JSON, XML, voire HTML. Le client choisit le format souhaite par l'intermediaire de l'en-tête HTTP \op{Accept}, ce mécanisme etant désigné par l'expression \emph{content negotiation}. Cette flexibilité permet à un même service de coexister avec des consommateurs hétérogènes sans dupliquer son code métier.
+
+\subsection{Verbes HTTP et codes de statut}
+
+Les opérations sur une ressource s'expriment au moyen des verbes du protocole HTTP, formalises dans la RFC 7231 \citep{rfc7231}. Les verbes \op{GET}, \op{POST}, \op{PUT}, \op{DELETE} et \op{PATCH} correspondent respectivement à la lecture, la création, le remplacement, la suppression et la modification partielle. Les codes de statut retournes par le serveur, organisés en familles 2xx, 4xx et 5xx, transmettent une semantique standardisée qui dispense de redefinir un code d'erreur applicatif pour chaque service.
+
+\subsection{Architecture sans état}
+
+REST imposé que chaque requête soit auto-portante : le serveur ne conserve aucun état conversationnel entre deux appels. Cette contrainte facilité considérablement la mise à l'échelle horizontale, puisque n'importe quel serveur d'un cluster peut traiter n'importe quelle requête sans synchronisation préalable. En revanche, l'authentification doit être transportee à chaque appel, généralement sous forme de jeton porté par l'en-tête \op{Authorization}, conformément à la RFC 7235 \citep{rfc7235}.
+
+\section{Comparaison générale des deux paradigmes}
+
+Le \autoref{tab:soap-vs-rest} synthétise les différences saillantes entre SOAP et REST, telles qu'elles ressortent de la littérature \citep{richardson2007, newman2021}.
+
+\begin{table}[ht]
+  \centering
+  \caption{Comparaison synthétique des paradigmes SOAP et REST.}
+  \label{tab:soap-vs-rest}
+  \begin{tabularx}{\linewidth}{l X X}
+    \toprule
+    \textbf{Critère} & \textbf{SOAP} & \textbf{REST} \\
+    \midrule
+    Contrat & Strict, WSDL & Implicite, documentation libre \\
+    Format & XML obligatoire & JSON, XML, autres \\
+    Couplage client-serveur & Fort & Faible \\
+    Outillage & Génération de stubs & curl, navigateur, SDK léger \\
+    Mise à l'échelle & Plus complexe (état) & Naturelle (sans état) \\
+    Verbose & Élevé & Modéré \\
+    Domaines de predilection & Échanges entre entreprises & Services Web grand public \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Le pattern Port et Adaptateurs}
+
+Le pattern dit \emph{hexagonal}, formalisé par Alistair Cockburn \citep{cockburn2005}, propose de séparer le coeur métier d'une application des dispositifs techniques par l'introduction d'interfaces abstraites appelees \emph{ports}, dont les implémentations concrètes sont nommees \emph{adaptateurs}. Cette architecture poussé l'inversion de dépendance jusqu'à son terme : le code métier ne dépend que d'abstractions, et les choix technologiques deviennent interchangeables. Vaughn Vernon en proposé une mise en pratique etoffee dans le contexte du \emph{Domain-Driven Design} \citep{vernon2013}.
+
+Dans notre réalisation, ce pattern joue un rôle décisif. Il permet aux pages PHP du frontend d'ignorer si elles dialoguent avec un service SOAP ou un service REST. La bascule entre les deux phases s'effectue par simple changement d'une variable d'environnement, sans modification du code applicatif.
+
+\section{La sécurisation des mots de passe par bcrypt}
+
+L'authentification de notre application repose sur la vérification de mots de passe stockés sous forme de \emph{hashes}. Le choix d'un algorithme adapte conditionne la robustesse de la solution face aux attaques par force brute. Nous retenons bcrypt, proposé par Provos et Mazieres en 1999 \citep{provos1999}. Cet algorithme présente la particularité d'être intentionnellement lent et paramétrable par un \emph{cost factor}, ce qui permet d'ajuster la difficulte des attaques au fil de l'évolution des capacités matérielles.
+
+\section{Le polling, alternative simple aux protocoles temps réel}
+
+Pour la livraison des messages au navigateur, notre application n'utilise pas WebSocket ni Server-Sent Events, mais une scrutation périodique de l'endpoint \op{getMessages}. Cette technique, designee par le terme \emph{polling}, présente le mérite de n'exiger aucune extension du protocole HTTP standard et de fonctionner derriere n'importe quel proxy d'entreprise. Elle reste suffisante pour des fréquences de rafraichissement de l'ordre de la seconde, comme c'est le cas dans une chatroom textuelle ordinaire.
+
+\section{Synthèse}
+
+Ce panorama théorique établit le socle conceptuel nécessaire à la suite du mémoire. Nous disposons désormais d'une compréhension claire des deux paradigmes à comparer, du pattern architectural retenu pour le frontend, et des choix complémentaires concernant la sécurité et la livraison des messages. Le chapitre suivant traduit ces fondements en spécifications techniques pour notre réalisation.

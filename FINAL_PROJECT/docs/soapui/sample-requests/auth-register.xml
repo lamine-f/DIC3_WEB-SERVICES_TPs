@@ -1,0 +1,24 @@
+<!--
+  Operation : register (AuthService Java JAX-WS Metro)
+  Endpoint  : http://localhost:9001/auth
+  SOAPAction: "" (Metro n'utilise pas SOAPAction)
+  Namespace : http://chatroom.dic3/auth
+  Retour    : token sous <return>...</return>
+  Fault     : AuthFault si username deja pris (code USER_ALREADY_EXISTS)
+
+  Test curl equivalent :
+    curl -X POST http://localhost:9001/auth \
+      -H 'Content-Type: text/xml; charset=utf-8' \
+      -H 'SOAPAction: ""' \
+      -d @auth-register.xml
+-->
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:register>
+      <username>alice</username>
+      <password>secret</password>
+    </auth:register>
+  </soap:Body>
+</soap:Envelope>

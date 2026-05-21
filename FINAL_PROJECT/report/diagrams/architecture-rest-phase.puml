@@ -1,0 +1,56 @@
+@startuml architecture-rest-phase
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+
+title Architecture détaillée de la phase REST
+
+actor "Utilisateur" as user
+
+[Frontend PHP\nRestBackendClient] as frontend
+
+package "Services REST" {
+  component "AuthService Java" as authRest {
+    [Jersey + Grizzly] as jersey
+    [@Produces JSON+XML]
+    [JAXB serialization]
+    [BCrypt PasswordHasher]
+  }
+
+  component "ChatService Python" as chatRest {
+    [Flask app] as flask
+    [@require_auth middleware]
+    [auth_client.py\n(REST sortant)]
+    [content negotiation\nresponse.py]
+  }
+}
+
+database "PostgreSQL 16" as pg {
+  frame "chatroom_auth_rest" {
+    [users]
+    [sessions]
+  }
+  frame "chatroom_chat_rest" {
+    [rooms]
+    [messages]
+  }
+}
+
+user --> frontend : POST /chat.php
+frontend --> jersey : HTTP + JSON\nhttp://localhost:8081
+frontend --> flask : HTTP + JSON\nhttp://localhost:8082
+flask --> jersey : GET /validate\nAuthorization: Bearer\n(REST inter-service)
+
+authRest --> [users]
+authRest --> [sessions]
+chatRest --> [rooms]
+chatRest --> [messages]
+
+note bottom of flask
+  Le décorateur @require_auth
+  intercepte chaque requête,
+  extrait le Bearer token et
+  délégué la validation a Jersey.
+end note
+
+@enduml

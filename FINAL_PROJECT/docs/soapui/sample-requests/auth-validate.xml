@@ -1,0 +1,31 @@
+<!--
+  Operation : validateToken (AuthService Java JAX-WS Metro)
+  Endpoint  : http://localhost:9001/auth
+  SOAPAction: ""
+  Namespace : http://chatroom.dic3/auth
+  Retour    : TokenInfoDTO { userId, username } sous <return>
+  Fault     : AuthFault (INVALID_TOKEN) si token bidon/expire
+
+  Pour tester le cas nominal :
+    1. Remplacer TOKEN_ICI par ${#Project#tokenAlice} (apres avoir lance Login)
+    2. Assertion XPath Match : //return/userId existe et != 0
+
+  Pour tester le cas erreur (cas pedagogique) :
+    1. Garder TOKEN_ICI tel quel (ou mettre n'importe quoi)
+    2. Assertion : SOAP Fault attendu (code INVALID_TOKEN)
+
+  Test curl :
+    curl -X POST http://localhost:9001/auth \
+      -H 'Content-Type: text/xml; charset=utf-8' \
+      -H 'SOAPAction: ""' \
+      -d @auth-validate.xml
+-->
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:validateToken>
+      <token>TOKEN_ICI</token>
+    </auth:validateToken>
+  </soap:Body>
+</soap:Envelope>

@@ -1,0 +1,234 @@
+\chapter{Mise en oeuvre}
+
+Après avoir présente la conception au chapitre précédent, nous detaillons ici la réalisation technique. Ce chapitre suit l'organisation du projet : nous commencons par la stack et l'outillage, puis nous examinons successivement la phase SOAP, la phase REST et le frontend.
+
+\section{Stack et outillage}
+
+\subsection{Versions retenues}
+
+Notre réalisation s'appuie sur les versions résumées dans le \autoref{tab:stack-versions}. Le choix de ces versions reflète trois priorités : la maturite des bibliothèques, la disponibilite de la documentation officielle, et la compatibilite mutuelle entre les composants.
+
+\begin{table}[ht]
+  \centering
+  \caption{Versions des composants techniques retenus.}
+  \label{tab:stack-versions}
+  \begin{tabularx}{\linewidth}{l X l}
+    \toprule
+    \textbf{Composant} & \textbf{Rôle} & \textbf{Version} \\
+    \midrule
+    PostgreSQL          & SGBD relationnel (Docker)               & 16 \\
+    Java JDK            & Runtime AuthService SOAP et REST        & 21 \\
+    Maven               & Gestion des dépendances Java            & 3.8+ \\
+    JAX-WS Metro        & Implémentation SOAP côté Java           & 4.0.2 \\
+    Jersey + Grizzly    & Implémentation REST côté Java           & 3.1.8 \\
+    JAXB                & Serialisation XML automatique           & 4.0.5 \\
+    jBCrypt             & Hachage des mots de passe               & 0.4 (cost 10) \\
+    Node.js             & Runtime ChatService SOAP                & 20 LTS \\
+    node-soap           & Bibliotheque SOAP côté Node             & 1.1.6 \\
+    Express             & Serveur HTTP minimal                    & 4.19.2 \\
+    Python              & Runtime ChatService REST                & 3.12 \\
+    Flask               & Micro-framework REST                    & 3.0.3 \\
+    xmltodict           & Conversion XML-dict bidirectionnelle    & 0.13.0 \\
+    psycopg             & Driver PostgreSQL Python                & 3.2.3 \\
+    requests            & Client HTTP Python                      & 2.32.3 \\
+    PHP                 & Frontend                                & 8.2+ \\
+    Docker Compose      & Orchestration de PostgreSQL             & 20+ \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Organisation du dépôt}
+
+Le code source est organisé par phase puis par service. Les services SOAP résidents dans le répertoire \fpath{soap/}, les services REST dans \fpath{rest/}, le frontend dans \fpath{frontend-php/} et les scripts d'initialisation de base de données dans \fpath{database/init/}. Cette séparation physique reflète l'isolement fonctionnel des deux phases.
+
+\section{Phase SOAP}
+
+\subsection{Service d'authentification Java JAX-WS Metro}
+
+\subsubsection{Approche code-first}
+
+Le service d'authentification est écrit en Java selon l'approche code-first. Une interface annotee \texttt{@WebService} declare les opérations exposées ; l'implémentation correspond à une classe Java standard. Le contrat WSDL est généré automatiquement par Metro à partir des annotations, et publie au démarrage à l'URL \url{http://localhost:9001/auth?wsdl}.
+
+Le \autoref{lst:auth-service-interface} présente l'interface annotee, située dans le fichier \fpath{soap/auth-service/src/esp/dgi/ws/soap/auth/api/AuthService.java}.
+
+\begin{lstlisting}[language=Java, caption={Interface annotee du service d'authentification SOAP.}, label=lst:auth-service-interface]
+@WebService(targetNamespace = "http://chatroom.dic3/auth", name = "AuthService")
+public interface AuthService {
+    @WebMethod
+    String register(@WebParam(name = "username") String username,
+                    @WebParam(name = "password") String password) throws AuthFault;
+
+    @WebMethod
+    String login(@WebParam(name = "username") String username,
+                 @WebParam(name = "password") String password) throws AuthFault;
+
+    @WebMethod
+    boolean logout(@WebParam(name = "token") String token);
+
+    @WebMethod
+    TokenInfoDTO validateToken(@WebParam(name = "token") String token) throws AuthFault;
+}
+\end{lstlisting}
+
+\subsubsection{Cycle d'authentification}
+
+L'opération \op{register} vérifie d'abord la conformité des arguments (nom non vide, mot de passe d'au moins quatre caractères), puis l'unicité du nom dans la table \texttt{users}. Elle calcule ensuite le hash bcrypt du mot de passe à l'aide de la bibliothèque jBCrypt, avec un facteur de coût fixé à dix. La ligne utilisateur est insérée, puis un jeton de session de soixante-quatre caractères hexadécimaux est généré à partir de \texttt{SecureRandom} et stocké dans la table \texttt{sessions}. Ce jeton est retourné au client.
+
+L'opération \op{login} vérifie d'abord que le nom existe, puis compare le mot de passe fourni au hash stocké au moyen de \texttt{BCrypt.checkpw}. En cas de succès, un nouveau jeton est créé. En cas d'échec, le service levé une \texttt{AuthFault} avec le code \texttt{INVALID\_CREDENTIALS}.
+
+L'opération \op{validateToken} exécuté une requête jointe entre les tables \texttt{sessions} et \texttt{users}, ne retournant un \texttt{TokenInfoDTO} que si le jeton existe et n'est pas expire. Cette opération est consommee par \service{ChatService} a chaque appel métier.
+
+\subsubsection{Publication de l'endpoint}
+
+L'endpoint est publie au démarrage par l'appel \texttt{Endpoint.publish("http://0.0.0.0:9001/auth", new AuthServiceImpl())}. Cette unique ligne suffit à exposer le service ; Metro se charge de la génération du WSDL, du parsing des enveloppes SOAP entrantes et de la serialisation des réponses.
+
+\subsection{Service de chat Node.js node-soap}
+
+\subsubsection{Approche contract-first}
+
+A l'inversé, le service de chat est développé selon l'approche contract-first. Le contrat WSDL est écrit à la main dans le fichier \fpath{soap/chat-service/wsdl/chat.wsdl}, puis la bibliothèque node-soap implémente le service en s'appuyant sur ce contrat. Cette démarche illustre la séparation entre l'interface publique et l'implémentation interne.
+
+\subsubsection{Appel SOAP sortant pour la validation des jetons}
+
+Le point le plus intéressant de ce service réside dans le module \fpath{soap/chat-service/src/authClient.js}, qui réalisé les appels SOAP sortants vers le service Java pour valider les jetons. Le \autoref{lst:auth-client-node} en présente l'extrait essentiel.
+
+\begin{lstlisting}[language=JavaScript, caption={Appel SOAP sortant depuis ChatService Node vers AuthService Java.}, label=lst:auth-client-node]
+const soap = require('soap');
+let clientPromise = null;
+
+async function getClient() {
+  if (!clientPromise) {
+    clientPromise = soap.createClientAsync(process.env.AUTH_WSDL_URL);
+  }
+  return clientPromise;
+}
+
+async function validateToken(token) {
+  const c = await getClient();
+  const [resp] = await c.validateTokenAsync({ token });
+  return { userId: resp.return.userId, username: resp.return.username };
+}
+\end{lstlisting}
+
+La création du client est paresseuse : elle n'a lieu qu'à la première validation, ce qui évite l'échec au démarrage si \service{AuthService} n'est pas encore disponible. La promesse est ensuite mémorisée pour éviter les recreations inutiles.
+
+\section{Phase REST}
+
+\subsection{Service d'authentification Java JAX-RS Jersey}
+
+\subsubsection{Annotations déclaratives}
+
+Jersey adopte une approche entièrement déclarative : chaque ressource est une classe Java annotee, et chaque méthode publique correspond à un endpoint HTTP. La négociation de contenu est spécifiée par les annotations \texttt{@Produces} et \texttt{@Consumes}. Le \autoref{lst:auth-resource-rest} montre la classe ressource, située dans \fpath{rest/auth-service-java/src/esp/dgi/ws/rest/auth/server/resources/AuthResource.java}.
+
+\begin{lstlisting}[language=Java, caption={Ressource REST exposant l'authentification avec negociation de contenu.}, label=lst:auth-resource-rest]
+@Path("/")
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+public class AuthResource {
+
+    private final AuthService auth = new AuthService();
+
+    @POST
+    @Path("/login")
+    public TokenDTO login(CredentialsDTO body) {
+        return new TokenDTO(auth.login(body.getUsername(), body.getPassword()));
+    }
+
+    @GET
+    @Path("/validate")
+    public TokenInfoDTO validate(@HeaderParam("Authorization") String authorization) {
+        String token = extractBearer(authorization);
+        return auth.validateToken(token);
+    }
+    // autres opérations omises
+}
+\end{lstlisting}
+
+La double declaration \texttt{@Produces({JSON, XML})} active automatiquement la négociation de contenu. JAXB se charge de la serialisation des objets DTO, marques par l'annotation \texttt{@XmlRootElement}, vers le format adapte à l'en-tête \op{Accept} du client.
+
+\subsubsection{Bootstrap avec Grizzly}
+
+L'application est demarree par une méthode \texttt{main} qui configure un serveur HTTP Grizzly. Cette association Jersey + Grizzly fournit un conteneur léger, autonome, qui ne nécessite ni serveur applicatif externe ni configuration XML.
+
+\subsection{Service de chat Python Flask}
+
+\subsubsection{Architecture en blueprints}
+
+Le service de chat Python est structuré en \emph{blueprints} Flask. Les routes relatives aux salons résident dans \fpath{chatroom\_chat/routes/rooms.py}, celles relatives aux messages dans \fpath{chatroom\_chat/routes/messages.py}. Les services métier et les dépôts sont séparés pour respecter le principe de responsabilité unique.
+
+\subsubsection{Middleware d'authentification}
+
+L'authentification est matérialisée par un décorateur \texttt{@require\_auth} placé sur chaque route protégée. Ce décorateur extrait le jeton porté par l'en-tête \op{Authorization}, délègue sa validation au service Java par un appel HTTP, et stocke le résultat dans l'objet \texttt{g.user} mis à disposition par Flask pendant la durée de la requête. Si la validation échoue, le décorateur retourne immédiatement une réponse 401 sans exécuter la route protégée.
+
+\subsubsection{Négociation de contenu manuelle}
+
+Contrairement a JAX-RS qui réalisé la négociation déclarativement, Flask l'exposé comme un accès explicite à l'objet \texttt{request}. La fonction utilitaire \texttt{render}, definie dans \fpath{chatroom\_chat/http/response.py}, inspecte l'en-tête \op{Accept}, choisit le meilleur format disponible, et serialise la réponse en conséquence : JSON par defaut, XML via la bibliothèque xmltodict si le client le demande explicitement.
+
+\section{Frontend PHP}
+
+\subsection{Le port}
+
+Le port central, defini par l'interface \texttt{ClientInterface} dans \fpath{frontend-php/src/Client/ClientInterface.php}, expose les huit opérations métier. Cette interface ne mentionné aucun protocole : ses méthodes manipulent uniquement des chaînes de caractères, des entiers et des tableaux associatifs.
+
+\subsection{Adaptateur SOAP}
+
+L'adaptateur \texttt{SoapBackendClient}, placé dans le même répertoire, encapsule deux instances de \texttt{SoapClient}, une par service backend. Chaque méthode du port se traduit par un appel à la méthode SOAP correspondante. Les exceptions \texttt{SoapFault} sont capturées et reemballees en \texttt{BackendException}, ce qui isolé le code applicatif de toute connaissance protocolaire.
+
+\subsection{Adaptateur REST}
+
+L'adaptateur \texttt{RestBackendClient} suit une logique symétrique. Chaque méthode du port construit une requête cURL, ajoute l'en-tête \op{Authorization: Bearer} le cas echeant, décode la réponse JSON et levé une \texttt{BackendException} si le code de statut indique une erreur.
+
+\subsection{La fabrique}
+
+La classe \texttt{ClientFactory}, definie dans \fpath{frontend-php/src/ClientFactory.php}, expose une méthode statique \texttt{make()} qui consulte la variable d'environnement \code{BACKEND\_MODE} et instancie l'adaptateur approprie. Les pages PHP n'appellent jamais directement les adaptateurs ; elles passent toujours par la fabrique.
+
+\section{Séquences détaillées}
+
+\subsection{Séquence de connexion en phase SOAP}
+
+La \figref{séquence-login-soap} retrace le flux complet d'une connexion en phase SOAP. Le frontend transmet les identifiants à l'adaptateur SOAP, qui réalisé l'appel à travers le client SOAP PHP. Le service Java vérifie le mot de passe, crée une session et retourne un jeton. Toute incohérence se traduit par un \texttt{SoapFault} converti en \texttt{BackendException} côté PHP.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/séquence-login-soap.png}
+  \caption{Séquence détaillée de l'opération login en phase SOAP.}
+  \label{fig:séquence-login-soap}
+\end{figure}
+
+\subsection{Séquence d'envoi de message en phase REST}
+
+La \figref{séquence-sendmessage-rest} montre comment se déroulé un envoi de message en phase REST. La requête traversé l'adaptateur REST, le serveur Flask, le middleware d'authentification, puis le service Java avant l'insertion en base. Le décorateur \texttt{@require\_auth} concentre toute la responsabilité de validation, ce qui maintient les routes métier concises.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/séquence-sendmessage-rest.png}
+  \caption{Séquence détaillée de l'opération sendMessage en phase REST.}
+  \label{fig:séquence-sendmessage-rest}
+\end{figure}
+
+\subsection{Séquence du polling côté navigateur}
+
+La livraison des messages s'appuie sur une scrutation périodique. La \figref{séquence-polling} illustre la boucle, controlee par \texttt{setInterval} avec une période de mille cinq cents millisecondes. Le navigateur conserve localement une variable \texttt{sinceId}, qui correspond à l'identifiant du dernier message connu. A chaque itération, le navigateur demande uniquement les messages dont l'identifiant est supérieur à ce curseur, ce qui rend les appels successifs incrementaux.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/séquence-polling.png}
+  \caption{Séquence du polling de messages côté navigateur.}
+  \label{fig:séquence-polling}
+\end{figure}
+
+\section{Gestion des erreurs}
+
+\subsection{Stratégie commune}
+
+Les quatre services adoptent une stratégie commune de gestion des erreurs. Chaque erreur applicative est matérialisée par un type d'exception spécifique, capture à la frontière de chaque endpoint, et transformee en réponse structurée adaptee au protocole.
+
+\subsection{Mise en oeuvre par protocole}
+
+Côté SOAP, les exceptions sont propagees sous forme de \texttt{Fault} : \texttt{AuthFault} pour le service Java, ChatFault pour le service Node. Côté REST, le service Java exploité un \texttt{ExceptionMapper} JAX-RS qui transformé les \texttt{AuthException} en réponses JSON ou XML avec le code de statut HTTP approprie. Le service Python emballé ses \texttt{ChatError} dans un dictionnaire \texttt{\{error: \{code, message\}\}} serialise par la fonction \texttt{render}.
+
+Cette homogénéité est essentielle pour le frontend : les deux adaptateurs convertissent invariablement toute erreur en \texttt{BackendException}, ce qui permet aux pages PHP de présenter une expérience utilisateur uniforme quel que soit le protocole sous-jacent.
+
+\section{Synthèse}
+
+A l'issue de ce chapitre, nous disposons d'une réalisation complète et fonctionnelle, fidèle à la conception décrite au chapitre précédent. Le chapitre suivant rapporte les tests qui valident cette mise en oeuvre.

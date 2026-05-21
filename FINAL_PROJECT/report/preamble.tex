@@ -1,0 +1,151 @@
+% =====================================================
+% PREAMBLE — packages et configuration
+% =====================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% Mise en page
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.7cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% Couleurs et figures
+\usepackage{xcolor}
+\definecolor{esp-blue}{HTML}{1F3A93}
+\definecolor{esp-green}{HTML}{1E824C}
+\definecolor{code-bg}{HTML}{F4F4F4}
+\definecolor{code-kw}{HTML}{0033B3}
+\definecolor{code-str}{HTML}{067D17}
+\definecolor{code-com}{HTML}{8C8C8C}
+
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup{font=small, labelfont=bf, labelsep=colon}
+
+% Tableaux
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+
+% Listings de code
+\usepackage{listings}
+\lstdefinelanguage{XML}{
+  morestring=[s]{"}{"},
+  morecomment=[s]{<!--}{-->},
+  morekeywords={xmlns,version,encoding,targetNamespace,name,type,binding,location},
+  alsoletter={:},
+}
+\lstdefinelanguage{JavaScript}{
+  keywords={break,case,catch,const,continue,debugger,default,delete,do,else,export,extends,finally,for,function,if,import,in,instanceof,let,new,return,super,switch,this,throw,try,typeof,var,void,while,with,yield,async,await},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  morestring=[b]`,
+}
+\lstdefinelanguage{PHP}{
+  keywords={abstract,and,array,as,break,case,catch,class,clone,const,continue,declare,default,do,echo,else,elseif,empty,enddeclare,endfor,endforeach,endif,endswitch,endwhile,extends,final,finally,for,foreach,function,global,goto,if,implements,include,include_once,instanceof,interface,isset,list,namespace,new,null,or,print,private,protected,public,require,require_once,return,static,switch,throw,trait,try,unset,use,var,while,xor,yield,return,this,self,parent,true,false},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[l]{\#},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+}
+\lstset{
+  backgroundcolor=\color{code-bg},
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{code-kw}\bfseries,
+  stringstyle=\color{code-str},
+  commentstyle=\color{code-com}\itshape,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  breaklines=true,
+  showstringspaces=false,
+  frame=single,
+  framerule=0pt,
+  framesep=6pt,
+  tabsize=2,
+  captionpos=b,
+  abovecaptionskip=8pt,
+  belowcaptionskip=8pt,
+  extendedchars=true,
+  inputencoding=utf8,
+  literate=%
+    {é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {ë}{{\"e}}1
+    {â}{{\^a}}1 {à}{{\`a}}1 {á}{{\'a}}1
+    {î}{{\^i}}1 {ï}{{\"i}}1
+    {ô}{{\^o}}1 {ö}{{\"o}}1
+    {û}{{\^u}}1 {ù}{{\`u}}1 {ü}{{\"u}}1
+    {ç}{{\c{c}}}1 {æ}{{\ae}}1 {œ}{{\oe}}1
+    {É}{{\'E}}1 {È}{{\`E}}1 {Ê}{{\^E}}1
+    {À}{{\`A}}1 {Â}{{\^A}}1
+    {Î}{{\^I}}1 {Ï}{{\"I}}1
+    {Ô}{{\^O}}1
+    {Û}{{\^U}}1 {Ù}{{\`U}}1
+    {Ç}{{\c{C}}}1 {Œ}{{\OE}}1
+}
+
+% Liens cliquables
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=esp-blue,
+  citecolor=esp-blue,
+  urlcolor=esp-green,
+  pdftitle={Rapport FINAL\_PROJECT — Chatroom SOAP et REST},
+  pdfauthor={Mouhamed Lamine Faye Zeitune},
+}
+
+% Guillemets français
+\usepackage{csquotes}
+\MakeOuterQuote{"}
+
+% Bibliographie (biblatex avec biber non installe : on utilise natbib + bibtex)
+\usepackage[numbers,square]{natbib}
+
+% En-têtes et pieds de page
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =====================================================
+% COMMANDES CUSTOM (cf. CLAUDE.md section 3)
+% =====================================================
+
+% Nom d'un service en italique petit cap
+\newcommand{\service}[1]{\textsc{\textit{#1}}}
+
+% Nom d'une opération en monospace
+\newcommand{\op}[1]{\texttt{#1}}
+
+% Chemin de fichier
+\newcommand{\fpath}[1]{\texttt{\detokenize{#1}}}
+
+% Extrait de code inline avec fond légèrement teinte
+\newcommand{\code}[1]{\colorbox{code-bg}{\texttt{\small #1}}}
+
+% Référence de figure typée
+\newcommand{\figref}[1]{\autoref{fig:#1}}
+\newcommand{\tabref}[1]{\autoref{tab:#1}}
+\newcommand{\lstref}[1]{\autoref{lst:#1}}
+
+% Labels français pour autoref
+\addto\extrasfrench{
+  \def\figureautorefname{figure}
+  \def\tableautorefname{tableau}
+  \def\chapterautorefname{chapitre}
+  \def\sectionautorefname{section}
+  \def\subsectionautorefname{sous-section}
+}
+\newcommand{\lstautorefname}{listing}

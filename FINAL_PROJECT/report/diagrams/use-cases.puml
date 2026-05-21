@@ -1,0 +1,65 @@
+@startuml use-cases
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Helvetica"
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+title Diagramme de cas d'utilisation — Chatroom
+
+left to right direction
+
+actor "Visiteur" as visitor
+actor "Utilisateur\nauthentifié" as user
+
+user --|> visitor
+
+rectangle "Chatroom" {
+
+  package "AuthService" #LightBlue {
+    usecase "S'inscrire" as UC_register
+    usecase "Se connecter" as UC_login
+    usecase "Se déconnecter" as UC_logout
+    usecase "Valider\nle jeton" as UC_validate
+  }
+
+  package "ChatService" #LightGreen {
+    usecase "Lister les salons" as UC_listRooms
+    usecase "Créer un salon" as UC_createRoom
+    usecase "Envoyer un message" as UC_sendMsg
+    usecase "Lire les messages\n(polling)" as UC_getMsgs
+  }
+}
+
+' Visiteur : opérations pré-authentification
+visitor --> UC_register
+visitor --> UC_login
+
+' Utilisateur authentifié : opérations métier
+user --> UC_logout
+user --> UC_listRooms
+user --> UC_createRoom
+user --> UC_sendMsg
+user --> UC_getMsgs
+
+' Composition de services : chaque opération chat valide d'abord le jeton
+UC_listRooms  ..> UC_validate : <<include>>
+UC_createRoom ..> UC_validate : <<include>>
+UC_sendMsg    ..> UC_validate : <<include>>
+UC_getMsgs    ..> UC_validate : <<include>>
+
+note bottom of UC_validate
+  Operation interne sollicitee
+  par ChatService a chaque
+  requete metier (composition
+  de services inter-protocole).
+end note
+
+note right of UC_getMsgs
+  Le client interroge
+  l'operation toutes les
+  1,5 s avec un curseur
+  sinceId monotone.
+end note
+
+@enduml

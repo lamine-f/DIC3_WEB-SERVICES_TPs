@@ -1,0 +1,30 @@
+<!--
+  Operation : sendMessage (ChatService Node.js)
+  Endpoint  : http://localhost:9002/chat
+  SOAPAction: "sendMessage"
+  Namespace : http://chatroom.dic3/chat
+  Retour    : <messageId>123</messageId> (long monotone)
+  Fault     : ChatFault si token invalide ou roomId inexistant
+
+  Property Transfer recommande :
+    Source : Response, XPath //messageId
+    Target : Project property "messageId"
+    -> Reutilise dans l'assertion de getMessages pour verifier la livraison.
+
+  Test curl :
+    curl -X POST http://localhost:9002/chat \
+      -H 'Content-Type: text/xml; charset=utf-8' \
+      -H 'SOAPAction: "sendMessage"' \
+      -d @chat-send-message.xml
+-->
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:sendMessage>
+      <token>TOKEN_ICI</token>
+      <roomId>1</roomId>
+      <content>Salut depuis SoapUI !</content>
+    </chat:sendMessage>
+  </soap:Body>
+</soap:Envelope>

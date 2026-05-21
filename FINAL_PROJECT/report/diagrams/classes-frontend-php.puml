@@ -1,0 +1,76 @@
+@startuml classes-frontend-php
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam classFontName "Helvetica"
+
+title Pattern Port + Adapters côté frontend PHP
+
+interface "ClientInterface" as port <<PORT>> {
+  + register(username, password) : string
+  + login(username, password) : string
+  + logout(token) : bool
+  + validateToken(token) : array
+  + listRooms(token) : array
+  + createRoom(token, name) : array
+  + sendMessage(token, roomId, content) : int
+  + getMessages(token, roomId, sinceId) : array
+}
+
+class "SoapBackendClient" as adapter1 <<ADAPTER 1>> {
+  - SoapClient authClient
+  - SoapClient chatClient
+  --
+  + __construct(authWsdl, chatWsdl)
+  + login(username, password) : string
+  + sendMessage(token, roomId, content) : int
+  ...
+}
+
+class "RestBackendClient" as adapter2 <<ADAPTER 2>> {
+  - string authBaseUrl
+  - string chatBaseUrl
+  --
+  + __construct(authBaseUrl, chatBaseUrl)
+  + login(username, password) : string
+  + sendMessage(token, roomId, content) : int
+  ...
+}
+
+class "ClientFactory" as factory {
+  + {static} make() : ClientInterface
+}
+
+class "BackendException" as ex {
+  + int statusCode
+  + string errorCode
+}
+
+port <|.. adapter1
+port <|.. adapter2
+factory ..> port : <<creates>>
+factory --> "1" adapter1 : si BACKEND_MODE=soap
+factory --> "1" adapter2 : si BACKEND_MODE=rest
+
+adapter1 ..> ex : <<throws>>
+adapter2 ..> ex : <<throws>>
+
+note right of port
+  PORT : interface métier abstraite,
+  zero dépendance protocole.
+  Les pages PHP n'appellent
+  que cette interface.
+end note
+
+note bottom of adapter1
+  ADAPTER 1 : encapsule
+  new SoapClient() pour
+  chaque service backend.
+end note
+
+note bottom of adapter2
+  ADAPTER 2 : encapsule
+  curl_init() + Bearer token
+  pour chaque endpoint REST.
+end note
+
+@enduml

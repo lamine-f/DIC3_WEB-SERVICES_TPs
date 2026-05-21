@@ -1,0 +1,44 @@
+@startuml séquence-login-soap
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+title Séquence de l'opération login en phase SOAP
+
+actor "Utilisateur" as user
+participant "login.php" as page
+participant "ClientFactory" as factory
+participant "SoapBackendClient\n(adapter)" as adapter
+participant "PHP SoapClient" as soap
+participant "AuthService Java\n(JAX-WS Metro)" as java
+participant "UserDao + SessionDao" as dao
+database "chatroom_auth_soap" as db
+
+user -> page : POST username, password
+page -> factory : make()
+factory --> page : SoapBackendClient
+page -> adapter : login(username, password)
+adapter -> soap : __soapCall('login', [u, p])
+soap -> java : POST /auth\n<soap:Envelope>...
+java -> dao : findByUsername(u)
+dao -> db : SELECT id, password_hash\nFROM users WHERE username = ?
+db --> dao : User(id=7, hash=...)
+dao --> java : User
+
+java -> java : BCrypt.checkpw(p, hash)
+alt mot de passe valide
+  java -> dao : createToken(userId=7)
+  dao -> db : INSERT INTO sessions\n(token, user_id, expires_at)
+  db --> dao : OK
+  dao --> java : "abc123def456..."
+  java --> soap : <return>abc123def456</return>
+  soap --> adapter : token
+  adapter --> page : token
+  page -> user : redirige vers /chat.php\n(cookie session)
+else mot de passe invalidé
+  java --> soap : <soap:Fault>INVALID_CREDENTIALS</soap:Fault>
+  soap --> adapter : SoapFault
+  adapter --> page : throw BackendException
+  page --> user : "Identifiants invalides"
+end
+
+@enduml

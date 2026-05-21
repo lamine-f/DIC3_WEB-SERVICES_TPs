@@ -1,0 +1,39 @@
+@startuml séquence-sendmessage-rest
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+title Séquence de l'opération sendMessage en phase REST
+
+actor "Utilisateur\n(alice)" as user
+participant "chat.js\n(navigateur)" as js
+participant "api-proxy.php" as proxy
+participant "RestBackendClient" as adapter
+participant "ChatService\n(Python Flask)" as flask
+participant "@require_auth\nmiddleware" as mw
+participant "AuthService\n(Java Jersey)" as jersey
+database "auth_rest" as authdb
+database "chat_rest" as chatdb
+
+user -> js : tape "Salut Bob !" + Entree
+js -> proxy : POST ?action=sendMessage\n+ token
+proxy -> adapter : sendMessage(token, roomId, content)
+adapter -> flask : POST /rooms/{id}/messages\nAuthorization: Bearer <token>\n{"content": "Salut Bob !"}
+
+flask -> mw : intercepte la requête
+mw -> jersey : GET /validate\nAuthorization: Bearer <token>
+jersey -> authdb : SELECT u.id, u.username\nFROM sessions s JOIN users u
+authdb --> jersey : (7, "alice")
+jersey --> mw : 200 {"userId": 7, "username": "alice"}
+
+mw -> mw : g.user = {userId: 7,\nusername: "alice"}
+mw --> flask : continue
+
+flask -> chatdb : INSERT INTO messages\n(room_id, user_id, username, content)\nVALUES (1, 7, "alice", "Salut Bob !")
+chatdb --> flask : message_id = 42
+
+flask --> adapter : 201 {"id": 42}
+adapter --> proxy : 42
+proxy --> js : OK
+js -> js : append au DOM\nupdate sinceId = max(sinceId, 42)
+
+@enduml

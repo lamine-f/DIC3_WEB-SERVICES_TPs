@@ -1,0 +1,79 @@
+@startuml mcd
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam linetype ortho
+hide circle
+hide empty members
+
+title Modèle Conceptuel de Données (MCD) — backends isolés
+
+package "Base AUTH (chatroom_auth_{soap|rest})" #LightBlue {
+  entity "USER" as user {
+    * id : SERIAL <<PK>>
+    --
+    * username : VARCHAR(50) <<UNIQUE>>
+    * password_hash : VARCHAR(255)
+    created_at : TIMESTAMP
+  }
+
+  entity "SESSION" as session {
+    * token : CHAR(64) <<PK>>
+    --
+    * user_id : INTEGER <<FK>>
+    created_at : TIMESTAMP
+    * expires_at : TIMESTAMP
+  }
+}
+
+package "Base CHAT (chatroom_chat_{soap|rest})" #LightGreen {
+  entity "ROOM" as room {
+    * id : SERIAL <<PK>>
+    --
+    * name : VARCHAR(80) <<UNIQUE>>
+    * created_by : INTEGER <<opaque>>
+    created_at : TIMESTAMP
+  }
+
+  entity "MESSAGE" as message {
+    * id : BIGSERIAL <<PK>>
+    --
+    * room_id : INTEGER <<FK>>
+    * user_id : INTEGER <<opaque>>
+    * username : VARCHAR(50) <<dénormalisé>>
+    * content : TEXT
+    created_at : TIMESTAMP(3)
+  }
+}
+
+user ||--o{ session : "ouvre"
+room ||--o{ message : "contient"
+
+user .[#red,dashed]. message : "<<liaison logique applicative>>\nuser_id opaque\nresolu via validateToken"
+user .[#red,dashed]. room : "<<liaison logique applicative>>\ncreated_by opaque"
+
+note bottom of message
+  Le champ username est duplique
+  (dénormalisé) au moment du
+  sendMessage pour éviter un
+  appel inter-service à chaque
+  lecture.
+
+  L'identifiant BIGSERIAL monotone
+  sert de curseur de polling
+  (sinceId) entre clients.
+end note
+
+note right of user
+  Les deux bases AUTH et CHAT
+  vivent dans la même instance
+  PostgreSQL mais sont
+  physiquement isolées.
+
+  Aucune clé étrangère physique
+  ne relié users.id a
+  messages.user_id : la cohérence
+  est garantie par appel
+  inter-service.
+end note
+
+@enduml

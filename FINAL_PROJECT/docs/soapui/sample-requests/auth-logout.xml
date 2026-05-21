@@ -1,0 +1,25 @@
+<!--
+  Operation : logout (AuthService Java JAX-WS Metro)
+  Endpoint  : http://localhost:9001/auth
+  SOAPAction: ""
+  Namespace : http://chatroom.dic3/auth
+  Retour    : boolean sous <return>true</return> (toujours true meme si token deja invalide)
+  Pas de fault
+
+  A placer en derniere position du scenario.
+
+  Test curl :
+    curl -X POST http://localhost:9001/auth \
+      -H 'Content-Type: text/xml; charset=utf-8' \
+      -H 'SOAPAction: ""' \
+      -d @auth-logout.xml
+-->
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:logout>
+      <token>TOKEN_ICI</token>
+    </auth:logout>
+  </soap:Body>
+</soap:Envelope>

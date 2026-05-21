@@ -1,0 +1,569 @@
+{
+  "info": {
+    "name": "Chatroom REST — FINAL_PROJECT",
+    "description": "Collection reutilisable pour tester l'interaction entre les 2 services REST polyglottes.\n\n## Organisation par service\n- **AuthService** (Java JAX-RS — port 8081) : register / login / validate / logout\n- **ChatService** (Python Flask — port 8082) : rooms / messages\n\n## Scenario complet (ordre du Runner)\n1. Register alice + bob (tolere 409 si deja existants)\n2. Login alice / bob -> tokens stockes dans {{tokenAlice}} / {{tokenBob}}\n3. Validate token (JSON + XML)\n4. Validate token invalide -> 401 attendu\n5. Logout alice + bob -> a la fin (les requetes Logout sont positionnees apres les tests Chat dans l'ordre d'execution)\n\nNote : l'ordre d'execution du Runner suit la position des requetes dans la collection — il est concu pour que le scenario reste coherent malgre le regroupement par service.\n\nLancer via Collection Runner pour rejouer en boucle, ou via Newman en CLI.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "lastSinceId", "value": "0" }
+  ],
+  "item": [
+    {
+      "name": "AuthService (Java JAX-RS — port 8081)",
+      "description": "Endpoints exposes par `rest/auth-service-java` (`AuthResource.java`). Tous repondent en JSON et XML via content negotiation (`Accept`).",
+      "item": [
+        {
+          "name": "Register alice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('register alice : 200 ou 409 (deja existant)', () => {",
+                  "  pm.expect([200, 201, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code < 300) {",
+                  "  const t = pm.response.json().token;",
+                  "  if (t) pm.environment.set('tokenAlice', t);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userAlice}}\",\n  \"password\": \"{{passwordAlice}}\"\n}"
+            },
+            "url": { "raw": "{{authUrl}}/register", "host": ["{{authUrl}}"], "path": ["register"] }
+          }
+        },
+        {
+          "name": "Register bob",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('register bob : 200 ou 409', () => {",
+                  "  pm.expect([200, 201, 409]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code < 300) {",
+                  "  const t = pm.response.json().token;",
+                  "  if (t) pm.environment.set('tokenBob', t);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userBob}}\",\n  \"password\": \"{{passwordBob}}\"\n}"
+            },
+            "url": { "raw": "{{authUrl}}/register", "host": ["{{authUrl}}"], "path": ["register"] }
+          }
+        },
+        {
+          "name": "Login alice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('login alice = 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('token present', () => pm.expect(json.token).to.be.a('string').and.not.empty);",
+                  "pm.environment.set('tokenAlice', json.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userAlice}}\",\n  \"password\": \"{{passwordAlice}}\"\n}"
+            },
+            "url": { "raw": "{{authUrl}}/login", "host": ["{{authUrl}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "Login bob",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('login bob = 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.environment.set('tokenBob', json.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userBob}}\",\n  \"password\": \"{{passwordBob}}\"\n}"
+            },
+            "url": { "raw": "{{authUrl}}/login", "host": ["{{authUrl}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "Validate token alice (JSON)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('validate = 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('userId + username presents', () => {",
+                  "  pm.expect(j).to.have.property('userId');",
+                  "  pm.expect(j).to.have.property('username');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAlice}}" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{authUrl}}/validate", "host": ["{{authUrl}}"], "path": ["validate"] }
+          }
+        },
+        {
+          "name": "Validate token alice (XML)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('validate XML = 200', () => pm.response.to.have.status(200));",
+                  "pm.test('content-type XML', () => {",
+                  "  pm.expect(pm.response.headers.get('Content-Type')).to.match(/xml/);",
+                  "});",
+                  "pm.test('body contient <username>', () => {",
+                  "  pm.expect(pm.response.text()).to.include('<username>');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAlice}}" },
+              { "key": "Accept", "value": "application/xml" }
+            ],
+            "url": { "raw": "{{authUrl}}/validate", "host": ["{{authUrl}}"], "path": ["validate"] }
+          }
+        },
+        {
+          "name": "Validate token invalide -> 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('token bidon = 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer not-a-real-token" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": { "raw": "{{authUrl}}/validate", "host": ["{{authUrl}}"], "path": ["validate"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ChatService (Python Flask — port 8082)",
+      "description": "Endpoints exposes par `rest/chat-service-python`. Repond en JSON et XML via `Accept`. Tous les endpoints requierent un Bearer token valide (delegue a AuthService).",
+      "item": [
+        {
+          "name": "Rooms",
+          "description": "Blueprint `chatroom_chat/routes/rooms.py` — gestion des salons.",
+          "item": [
+            {
+              "name": "Create room (alice)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.environment.set('roomName', 'general-' + Date.now());"
+                    ],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('create room : 201 ou 409', () => pm.expect([201, 409]).to.include(pm.response.code));",
+                      "if (pm.response.code === 201) {",
+                      "  const j = pm.response.json();",
+                      "  pm.environment.set('roomId', j.id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{tokenAlice}}" },
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"{{roomName}}\"\n}"
+                },
+                "url": { "raw": "{{chatUrl}}/rooms", "host": ["{{chatUrl}}"], "path": ["rooms"] }
+              }
+            },
+            {
+              "name": "List rooms (alice) - JSON",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('list rooms = 200', () => pm.response.to.have.status(200));",
+                      "const j = pm.response.json();",
+                      "pm.test('rooms est un tableau', () => pm.expect(j.rooms).to.be.an('array'));",
+                      "// si roomId pas encore set, on prend la premiere room du tableau pour la suite",
+                      "if (!pm.environment.get('roomId') && j.rooms.length > 0) {",
+                      "  pm.environment.set('roomId', j.rooms[0].id);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{tokenAlice}}" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "url": { "raw": "{{chatUrl}}/rooms", "host": ["{{chatUrl}}"], "path": ["rooms"] }
+              }
+            },
+            {
+              "name": "List rooms (alice) - XML",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('list rooms XML = 200', () => pm.response.to.have.status(200));",
+                      "pm.test('content-type xml', () => pm.expect(pm.response.headers.get('Content-Type')).to.match(/xml/));"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{tokenAlice}}" },
+                  { "key": "Accept", "value": "application/xml" }
+                ],
+                "url": { "raw": "{{chatUrl}}/rooms", "host": ["{{chatUrl}}"], "path": ["rooms"] }
+              }
+            },
+            {
+              "name": "Create room sans token -> 401",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('sans token = 401', () => pm.response.to.have.status(401));"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"forbidden\"\n}"
+                },
+                "url": { "raw": "{{chatUrl}}/rooms", "host": ["{{chatUrl}}"], "path": ["rooms"] }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Messages",
+          "description": "Blueprint `chatroom_chat/routes/messages.py` — envoi et polling.",
+          "item": [
+            {
+              "name": "Alice envoie un message",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.environment.set('aliceMsg', 'Salut Bob, il est ' + new Date().toISOString());"
+                    ],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('message cree = 201', () => pm.response.to.have.status(201));",
+                      "const j = pm.response.json();",
+                      "pm.test('id du message present', () => pm.expect(j.id).to.be.a('number'));",
+                      "pm.environment.set('messageId', j.id);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{tokenAlice}}" },
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"{{aliceMsg}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{chatUrl}}/rooms/{{roomId}}/messages",
+                  "host": ["{{chatUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "messages"]
+                }
+              }
+            },
+            {
+              "name": "Bob lit les messages (polling sinceId)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('get messages = 200', () => pm.response.to.have.status(200));",
+                      "const j = pm.response.json();",
+                      "pm.test('messages est un tableau', () => pm.expect(j.messages).to.be.an('array'));",
+                      "if (j.messages.length > 0) {",
+                      "  const max = Math.max(...j.messages.map(m => m.id));",
+                      "  pm.environment.set('lastSinceId', max);",
+                      "  pm.test('le dernier message d\\'alice est present', () => {",
+                      "    const found = j.messages.some(m => m.id === parseInt(pm.environment.get('messageId')));",
+                      "    pm.expect(found).to.be.true;",
+                      "  });",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{tokenBob}}" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "url": {
+                  "raw": "{{chatUrl}}/rooms/{{roomId}}/messages?sinceId=0",
+                  "host": ["{{chatUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "messages"],
+                  "query": [{ "key": "sinceId", "value": "0" }]
+                }
+              }
+            },
+            {
+              "name": "Bob repond",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('reponse de bob = 201', () => pm.response.to.have.status(201));"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{tokenBob}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"content\": \"Yo Alice, recu 5/5 !\"\n}"
+                },
+                "url": {
+                  "raw": "{{chatUrl}}/rooms/{{roomId}}/messages",
+                  "host": ["{{chatUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "messages"]
+                }
+              }
+            },
+            {
+              "name": "Alice poll les nouveaux (sinceId={{lastSinceId}})",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('poll alice = 200', () => pm.response.to.have.status(200));",
+                      "const j = pm.response.json();",
+                      "pm.test('au moins 1 nouveau message depuis sinceId', () => {",
+                      "  pm.expect(j.messages.length).to.be.greaterThan(0);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{tokenAlice}}" },
+                  { "key": "Accept", "value": "application/json" }
+                ],
+                "url": {
+                  "raw": "{{chatUrl}}/rooms/{{roomId}}/messages?sinceId={{lastSinceId}}",
+                  "host": ["{{chatUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "messages"],
+                  "query": [{ "key": "sinceId", "value": "{{lastSinceId}}" }]
+                }
+              }
+            },
+            {
+              "name": "Messages en XML",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('XML = 200', () => pm.response.to.have.status(200));",
+                      "pm.test('content-type XML', () => pm.expect(pm.response.headers.get('Content-Type')).to.match(/xml/));"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{tokenAlice}}" },
+                  { "key": "Accept", "value": "application/xml" }
+                ],
+                "url": {
+                  "raw": "{{chatUrl}}/rooms/{{roomId}}/messages?sinceId=0",
+                  "host": ["{{chatUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "messages"],
+                  "query": [{ "key": "sinceId", "value": "0" }]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AuthService — Logout (fin de scenario)",
+      "description": "Place en fin de collection pour que le Runner termine proprement (logout = invalidation du token serveur). Ces requetes appartiennent au meme service que le dossier 'AuthService' mais sont separees pour preserver l'ordre d'execution du scenario complet.",
+      "item": [
+        {
+          "name": "Logout alice",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('logout = 204', () => pm.response.to.have.status(204));",
+                  "pm.environment.unset('tokenAlice');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenAlice}}" }
+            ],
+            "url": { "raw": "{{authUrl}}/logout", "host": ["{{authUrl}}"], "path": ["logout"] }
+          }
+        },
+        {
+          "name": "Logout bob",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('logout = 204', () => pm.response.to.have.status(204));",
+                  "pm.environment.unset('tokenBob');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{tokenBob}}" }
+            ],
+            "url": { "raw": "{{authUrl}}/logout", "host": ["{{authUrl}}"], "path": ["logout"] }
+          }
+        }
+      ]
+    }
+  ]
+}

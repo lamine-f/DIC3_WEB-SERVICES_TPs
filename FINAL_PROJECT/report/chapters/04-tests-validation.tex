@@ -1,0 +1,135 @@
+\chapter{Tests et validation}
+
+La présentation de la réalisation appelle naturellement la vérification de son bon fonctionnement. Ce chapitre rapporte notre démarche de test, organisée autour des deux outils de référence pour les services Web : Postman pour la phase REST et SoapUI pour la phase SOAP. Nous accompagnons chaque section de captures d'écran illustrant les échanges effectifs entre les services.
+
+\section{Méthodologie de test}
+
+\subsection{Niveaux de validation}
+
+Notre démarche distingue trois niveaux complémentaires. Le premier niveau, désigné par tests de \emph{requête unitaire}, valide chaque opération isolement : envoi d'une requête unique, vérification du code de statut, validation du format de réponse. Le deuxième niveau, dit tests de \emph{scénario}, enchaîne plusieurs opérations conformément à un parcours utilisateur réaliste : inscription, connexion, création de salon, envoi de message, lecture. Le troisième niveau, qualifié de tests d'\emph{interopérabilité}, observe le comportement du système lorsque l'un des composants devient indisponible.
+
+\subsection{Outils retenus}
+
+Le choix des outils répond à un double critère : pertinence par rapport au protocole et capacité de réutilisation des suites de tests. Postman est devenu un standard de fait pour le test des API REST, grâce à son moteur d'assertions JavaScript et à son \emph{Collection Runner}. SoapUI demeure la référence pour SOAP, en raison de sa capacité à interpréter directement les contrats WSDL et a générer automatiquement des suites de tests paramétrables.
+
+\section{Tests REST avec Postman}
+
+\subsection{Organisation de la collection}
+
+Notre collection Postman, placée dans \fpath{docs/postman/chatroom-rest.postman\_collection.json}, est organisée par service plutôt que par type de ressource. Cette organisation reflète l'architecture de l'application : un dossier rassemble les opérations exposées par \service{AuthService}, un autre celles de \service{ChatService}, et un dernier séparé les opérations de déconnexion afin de préserver l'ordre d'exécution lors d'un parcours complet.
+
+\subsection{Variables d'environnement}
+
+L'environnement Postman \fpath{chatroom-rest.postman\_environment.json} declare douze variables. Certaines sont fixés (URLs des services, identifiants des comptes de test), d'autres sont remplies dynamiquement par les scripts de test : les jetons \texttt{tokenAlice} et \texttt{tokenBob} sont extraits des réponses de connexion, l'identifiant \texttt{roomId} est capturé lors de la création d'un salon, et le curseur \texttt{lastSinceId} est mis à jour à chaque scrutation. Cette paramétrisation rend la collection rejouable à volonté sans intervention manuelle.
+
+\subsection{Capture du Runner}
+
+La \figref{postman-runner} présente le résultat d'une exécution complète de la collection dans le \emph{Collection Runner}. L'ensemble des assertions est vérifié, ce qui confirme le bon enchaînement du parcours utilisateur et la cohérence des données produites par chaque étape.
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\rule{0pt}{8cm}\rule{12cm}{0pt}}
+  \caption{Exécution complète de la collection Postman dans le Collection Runner.}
+  \label{fig:postman-runner}
+\end{figure}
+
+\subsection{Négociation de contenu}
+
+Une particularité de notre API mérite une attention spécifique : la négociation de contenu permet à un même endpoint de servir le format JSON ou le format XML selon la valeur de l'en-tête \op{Accept}. La \figref{postman-json} montre la réponse au format JSON, tandis que la \figref{postman-xml} montre exactement la même requête avec l'en-tête \texttt{Accept: application/xml}.
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\rule{0pt}{6cm}\rule{12cm}{0pt}}
+  \caption{Réponse JSON à l'endpoint \op{GET /rooms} avec \texttt{Accept: application/json}.}
+  \label{fig:postman-json}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\rule{0pt}{6cm}\rule{12cm}{0pt}}
+  \caption{Réponse XML au même endpoint avec \texttt{Accept: application/xml}.}
+  \label{fig:postman-xml}
+\end{figure}
+
+\subsection{Exécution en ligne de commande}
+
+Au-delà de l'interface graphique, la collection peut être exécutée en ligne de commande grâce à l'outil Newman. Cette exécution non interactive convient particulièrement à l'intégration continue ; un rapport HTML peut être généré pour archive. La commande type est la suivante :
+
+\begin{lstlisting}[language=bash, caption={Exécution de la collection via Newman.}]
+newman run docs/postman/chatroom-rest.postman_collection.json \
+  -e docs/postman/chatroom-rest.postman_environment.json \
+  --iteration-count 10 \
+  -r cli,html \
+  --reporter-html-export report.html
+\end{lstlisting}
+
+\section{Tests SOAP avec SoapUI}
+
+\subsection{Organisation du projet}
+
+Notre projet SoapUI, conserve dans \fpath{docs/soapui/chatroom-soap-soapui-project.xml}, contient deux interfaces correspondant aux deux services SOAP. Chaque interface importe le contrat WSDL correspondant et expose ses quatre opérations. Le projet contient en outre trois suites de tests : la première pour les opérations d'\service{AuthService}, la deuxième pour celles de \service{ChatService}, et la troisième pour la déconnexion finale.
+
+\subsection{Property Transfers et chaînage des tests}
+
+Le chaînage entre les étapes du scénario repose sur le mécanisme des \emph{Property Transfers} de SoapUI. Six transferts sont définis : extraction du jeton après chaque connexion, capture de l'identifiant du salon après sa création, capture de l'identifiant du message après son envoi, et mise à jour du curseur de lecture après la scrutation. Cette chaîne reproduit fidèlement le scénario testé côté REST avec Postman.
+
+\subsection{Capture du Navigator}
+
+La \figref{soapui-navigator} montre la vue \emph{Navigator} de SoapUI après l'import du projet. Les deux interfaces apparaissent avec leurs opérations, et les trois suites de tests sont accessibles depuis l'arborescence.
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\rule{0pt}{8cm}\rule{12cm}{0pt}}
+  \caption{Vue Navigator de SoapUI après l'import du projet.}
+  \label{fig:soapui-navigator}
+\end{figure}
+
+\subsection{Capture du TestRunner}
+
+L'exécution complète du scénario par le \emph{TestRunner} de SoapUI est présentée dans la \figref{soapui-runner}. L'ensemble des assertions est satisfait, comme l'indiquent les barres vertes associées à chaque suite et à chaque cas de test.
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\rule{0pt}{8cm}\rule{12cm}{0pt}}
+  \caption{Resultat de l'exécution complète dans le TestRunner de SoapUI.}
+  \label{fig:soapui-runner}
+\end{figure}
+
+\subsection{Inspection du trafic SOAP brut}
+
+L'un des grands intérêts de SoapUI est sa capacité à exposer le trafic SOAP brut. La \figref{soapui-raw-request} montre l'enveloppe SOAP envoyée pour une opération de connexion, tandis que la \figref{soapui-raw-response} expose l'enveloppe de réponse. Cette transparence facilite la pédagogie : l'étudiant visualise concrètement la structure des messages échanges.
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\rule{0pt}{6cm}\rule{12cm}{0pt}}
+  \caption{Enveloppe SOAP brute de la requête \op{login}.}
+  \label{fig:soapui-raw-request}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\rule{0pt}{6cm}\rule{12cm}{0pt}}
+  \caption{Enveloppe SOAP brute de la réponse à la requête \op{login}.}
+  \label{fig:soapui-raw-response}
+\end{figure}
+
+\section{Démonstration d'interopérabilité}
+
+\subsection{Composition de services observable}
+
+Le test le plus revelateur de notre architecture consiste à interrompre volontairement l'un des services pendant que les autres restent opérationnels. Lorsque nous arretons \service{AuthService} pendant que \service{ChatService} fonctionne, le frontend continue d'afficher les messages déjà recus, mais toute tentative d'envoi échoue avec une erreur d'authentification propre. Cette propagation controlee de l'erreur valide la composition de services : \service{ChatService} ne fait pas confiance aveuglement, il consulte systématiquement son pair avant chaque opération sensible.
+
+\subsection{Bascule SOAP-REST sans modification du code}
+
+Le pattern hexagonal côté frontend autorise une démonstration spectaculaire : nous arretons le serveur PHP avec \code{Ctrl+C}, modifions la valeur de la variable d'environnement \code{BACKEND\_MODE}, et relancons le serveur. Aucune ligne de code n'a été modifiée, et l'application bascule intégralement de SOAP vers REST. La \figref{frontend-chat} montre l'interface utilisateur, identique entre les deux modes.
+
+\begin{figure}[ht]
+  \centering
+  \fbox{\rule{0pt}{8cm}\rule{12cm}{0pt}}
+  \caption{Interface du frontend en cours d'utilisation, mode REST.}
+  \label{fig:frontend-chat}
+\end{figure}
+
+\section{Synthèse}
+
+L'ensemble des tests confirme que notre application répond aux objectifs fixés : les opérations métier sont correctement exposées dans les deux paradigmes, la composition de services fonctionne effectivement, et le frontend bascule entre les protocoles sans aucune modification de code. Le chapitre suivant prend du recul sur cette expérience et proposé une lecture critique des deux approches.

@@ -1,0 +1,27 @@
+<!--
+  Operation : login (AuthService Java JAX-WS Metro)
+  Endpoint  : http://localhost:9001/auth
+  SOAPAction: ""
+  Namespace : http://chatroom.dic3/auth
+  Retour    : token sous <return>...</return> (a extraire via Property Transfer XPath //return)
+  Fault     : AuthFault (INVALID_CREDENTIALS) si mauvais couple
+
+  Test curl :
+    curl -X POST http://localhost:9001/auth \
+      -H 'Content-Type: text/xml; charset=utf-8' \
+      -H 'SOAPAction: ""' \
+      -d @auth-login.xml
+
+  Dans SoapUI, remplacer "alice"/"secret" par :
+    ${#Project#userAlice} et ${#Project#passwordAlice}
+-->
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:login>
+      <username>alice</username>
+      <password>secret</password>
+    </auth:login>
+  </soap:Body>
+</soap:Envelope>

@@ -1,0 +1,38 @@
+@startuml séquence-polling
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+title Séquence du polling côté navigateur (toutes les 1.5 secondes)
+
+participant "chat.js\n(setInterval 1500ms)" as js
+participant "api-proxy.php" as proxy
+participant "ChatService" as chat
+database "messages" as db
+
+note over js
+  Variable locale : sinceId = 0
+end note
+
+loop toutes les 1.5 secondes
+  js -> proxy : GET ?action=getMessages\n&roomId=1&sinceId={sinceId}
+  proxy -> chat : getMessages(token, 1, sinceId)
+  chat -> db : SELECT * FROM messages\nWHERE room_id = 1\nAND id > sinceId\nORDER BY id
+  db --> chat : 0..N nouvelles lignes
+  chat --> proxy : [MessageDTO, ...]
+  proxy --> js : JSON [{id, username, content, ...}]
+
+  alt il y a des nouveaux messages
+    js -> js : for each m :\n  appendToDom(m)\n  sinceId = max(sinceId, m.id)
+  else aucun nouveau
+    js -> js : no-op
+  end
+end
+
+note over js, db
+  L'identifiant BIGSERIAL monotone
+  garantit que sinceId ne saute
+  pas un message, même entre
+  serveurs aux horloges decalees.
+end note
+
+@enduml

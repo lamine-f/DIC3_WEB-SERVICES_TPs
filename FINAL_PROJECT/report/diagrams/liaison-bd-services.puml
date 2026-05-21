@@ -1,0 +1,47 @@
+@startuml liaison-bd-services
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceMessageAlign center
+
+title Liaison cohérente entre les deux bases d'un même backend\n(résolution user_id <-> username au moment du sendMessage)
+
+actor "Utilisateur\n(alice)" as user
+participant "Frontend PHP" as front
+participant "ChatService\n(Node ou Python)" as chat
+database "chatroom_chat_*\n(rooms, messages)" as chatdb #LightGreen
+participant "AuthService\n(Java)" as auth
+database "chatroom_auth_*\n(users, sessions)" as authdb #LightBlue
+
+user -> front : "Salut Bob !"\n+ token Alice
+front -> chat : sendMessage(token, roomId, content)
+
+note over chat
+  ChatService ne connait
+  pas les utilisateurs.
+end note
+
+chat -> auth : validateToken(token)
+auth -> authdb : SELECT s.user_id, u.username\nFROM sessions s JOIN users u\nWHERE s.token = ?\nAND s.expires_at > NOW()
+authdb --> auth : {user_id: 7, username: "alice"}
+auth --> chat : TokenInfoDTO(userId=7, username="alice")
+
+note over chat #FFFFCC
+  Cohérence garantie :
+  username vient d'être
+  résolu par AuthService.
+end note
+
+chat -> chatdb : INSERT INTO messages\n(room_id, user_id, username, content)\nVALUES (?, 7, "alice", ?)
+note right of chatdb
+  user_id et username
+  sont stockés ensemble :
+  username est dénormalisé
+  (snapshot au moment
+  de l'écriture).
+end note
+chatdb --> chat : message_id = 42
+
+chat --> front : 42
+front --> user : message envoye
+
+@enduml

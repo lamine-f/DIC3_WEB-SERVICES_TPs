@@ -1,0 +1,54 @@
+@startuml architecture-soap-phase
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+
+title Architecture détaillée de la phase SOAP
+
+actor "Utilisateur" as user
+
+[Frontend PHP\nSoapBackendClient] as frontend
+
+package "Services SOAP" {
+  component "AuthService Java" as authSoap {
+    [JAX-WS Metro endpoint] as Metro
+    [BCrypt PasswordHasher]
+    [UserDao + SessionDao]
+  }
+
+  component "ChatService Node" as chatSoap {
+    [node-soap server] as nodesoap
+    [authClient.js\n(SOAP sortant)]
+    [Repositories pg]
+  }
+}
+
+database "PostgreSQL 16" as pg {
+  frame "chatroom_auth_soap" {
+    [users]
+    [sessions]
+  }
+  frame "chatroom_chat_soap" {
+    [rooms]
+    [messages]
+  }
+}
+
+user --> frontend : POST /chat.php
+frontend --> Metro : SOAP\nhttp://localhost:9001/auth
+frontend --> nodesoap : SOAP\nhttp://localhost:9002/chat
+nodesoap --> Metro : validateToken\n(SOAP inter-service)
+
+authSoap --> [users]
+authSoap --> [sessions]
+chatSoap --> [rooms]
+chatSoap --> [messages]
+
+note bottom of nodesoap
+  Avant chaque INSERT message,
+  ChatService Node interrogé
+  AuthService Java pour résoudre
+  user_id et username.
+end note
+
+@enduml

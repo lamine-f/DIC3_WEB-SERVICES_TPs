@@ -1,0 +1,82 @@
+\documentclass[12pt,a4paper,openany]{report}
+
+\input{preamble}
+\input{meta}
+
+\begin{document}
+
+% =====================================================
+% PAGE DE GARDE
+% =====================================================
+\begin{titlepage}
+  \centering
+  \vspace*{1cm}
+  {\large \reportSchool \par}
+  {\large \reportDepartment \par}
+  \vspace{0.5cm}
+  \rule{\linewidth}{0.4pt}
+  \vspace{1.5cm}
+
+  {\Large \textbf{Rapport de projet de fin de semestre} \par}
+  \vspace{0.3cm}
+  {\large \reportCourse \par}
+  \vspace{2cm}
+
+  {\Huge \textbf{\reportTitle} \par}
+  \vspace{1cm}
+  {\Large \textit{\reportSubtitle} \par}
+
+  \vspace{3cm}
+  \begin{minipage}{0.45\textwidth}
+    \begin{flushleft}
+      \textbf{Réalisé par :}\\
+      \reportAuthor
+    \end{flushleft}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.45\textwidth}
+    \begin{flushright}
+      \textbf{Programme :}\\
+      \reportProgram
+    \end{flushright}
+  \end{minipage}
+
+  \vfill
+  \rule{\linewidth}{0.4pt}
+  {\large \reportYear \quad --- \quad \reportDate \par}
+\end{titlepage}
+
+\cleardoublepage
+
+% =====================================================
+% TABLE DES MATIERES, FIGURES, TABLEAUX
+% =====================================================
+\pagenumbering{roman}
+\tableofcontents
+\listoffigures
+\listoftables
+
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% =====================================================
+% CHAPITRES
+% =====================================================
+\input{chapters/00-introduction}
+\input{chapters/01-etat-art}
+\input{chapters/02-conception}
+\input{chapters/03-implementation}
+\input{chapters/04-tests-validation}
+\input{chapters/05-discussion}
+\input{chapters/06-conclusion}
+
+% =====================================================
+% BIBLIOGRAPHIE
+% =====================================================
+\cleardoublepage
+\addcontentsline{toc}{chapter}{Bibliographie}
+\bibliographystyle{plainnat}
+\bibliography{bib/references}
+
+\end{document}

@@ -1,0 +1,26 @@
+<!--
+  Operation : listRooms (ChatService Node.js)
+  Endpoint  : http://localhost:9002/chat
+  SOAPAction: "listRooms"
+  Namespace : http://chatroom.dic3/chat
+  Retour    : 0..N elements <room><id/><name/><createdBy/></room>
+  Fault     : ChatFault si token invalide
+
+  Assertion utile :
+    - XPath Match : count(//room) >= 1 (apres avoir cree au moins une room)
+
+  Test curl :
+    curl -X POST http://localhost:9002/chat \
+      -H 'Content-Type: text/xml; charset=utf-8' \
+      -H 'SOAPAction: "listRooms"' \
+      -d @chat-list-rooms.xml
+-->
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:listRooms>
+      <token>TOKEN_ICI</token>
+    </chat:listRooms>
+  </soap:Body>
+</soap:Envelope>

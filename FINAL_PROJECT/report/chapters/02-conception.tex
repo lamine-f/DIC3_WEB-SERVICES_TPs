@@ -1,0 +1,170 @@
+\chapter{Analyse et conception}
+
+Après avoir posé le cadre théorique au chapitre précédent, nous abordons ici l'analyse fonctionnelle et la conception de notre application. Cette étape traduit les objectifs pédagogiques en spécifications techniques, en justifiant chaque choix de structure et de technologie.
+
+\section{Cahier des charges fonctionnel}
+
+\subsection{Description du cas métier}
+
+L'application réalisée est une chatroom textuelle multi-utilisateurs. Tout visiteur peut créer un compte, se connecter, rejoindre un salon de discussion existant, en créer de nouveaux, envoyer des messages et lire ceux des autres participants. Cette description, volontairement simple, suffit à faire émerger les opérations métier que les services Web devront exposer.
+
+\subsection{Vue par cas d'utilisation}
+
+Avant d'énumérer les opérations exposées par chaque service, nous proposons une représentation synthétique des interactions entre l'utilisateur et le système, sous la forme d'un diagramme de cas d'utilisation UML. Ce diagramme, présenté dans la \figref{use-cases}, distingue deux acteurs : le \emph{Visiteur}, anonyme, qui ne peut qu'effectuer les opérations d'inscription et de connexion, et l'\emph{Utilisateur authentifié}, qui hérite de ces capacités et accède en outre à l'ensemble des opérations métier de la chatroom.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/plantuml/use-cases.png}
+  \caption{Diagramme de cas d'utilisation de la chatroom, avec mise en évidence de la composition de services.}
+  \label{fig:use-cases}
+\end{figure}
+
+La particularité de ce diagramme tient aux relations \texttt{<<include>>} qui relient chaque cas du \service{ChatService} au cas technique \emph{Valider le jeton} appartenant à \service{AuthService}. Cette mise en évidence visuelle anticipe la discussion approfondie de la section consacrée à la liaison cohérente entre les deux bases : chaque opération de discussion sollicite implicitement le service d'authentification, ce qui justifie l'absence de clé étrangère physique entre les deux périmètres de stockage.
+
+\subsection{Opérations attendues}
+
+Nous identifions huit opérations métier, réparties en deux services autonomes. Le service d'authentification, désigné par \service{AuthService}, expose quatre opérations. La première, \op{register}, crée un compte utilisateur et retourne un jeton de session. La deuxième, \op{login}, authentifie un utilisateur existant et délivre également un jeton. La troisième, \op{logout}, invalide un jeton actif. La quatrième, \op{validateToken}, contrôle la validité d'un jeton et restitue les informations associées à son porteur.
+
+Le service de chat, désigné par \service{ChatService}, expose les quatre opérations relatives aux salons et aux messages. L'opération \op{listRooms} retourne l'inventaire des salons existants. L'opération \op{createRoom} ajoute un nouveau salon à la liste. L'opération \op{sendMessage} publie un message dans un salon donné. Enfin, l'opération \op{getMessages} restitue les messages d'un salon, éventuellement filtrés par un identifiant minimal pour éviter de retransmettre des messages déjà connus.
+
+\subsection{Exigences non fonctionnelles}
+
+Notre projet vise également plusieurs exigences non fonctionnelles. La première est l'isolement strict des deux phases SOAP et REST : il doit être possible de les développer, tester et exploiter indépendamment. La deuxième est la persistance fiable des données, garantie par un système de gestion de bases de données relationnel. La troisième est la transparence des appels réseau, condition indispensable pour observer la composition de services pendant les tests. La quatrième est la possibilité de remplacer l'un des composants par un autre langage sans modifier les contrats d'échange.
+
+\section{Architecture générale}
+
+\subsection{Vue d'ensemble}
+
+L'architecture retenue se décompose en trois couches. Le frontend PHP constitue la couche de présentation, accessible par le navigateur de l'utilisateur. Les services backend forment la couche métier ; ils sont rédigés dans des langages variés pour illustrer la polyglossie technologique. Enfin, le système PostgreSQL assure la persistance.
+
+La \figref{architecture-globale} présente cette organisation. On y distingue les deux phases coexistant dans une même topologie : la sélection du backend à interroger se fait dynamiquement par le frontend, en fonction d'une variable d'environnement consultée au démarrage.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/architecture-globale.png}
+  \caption{Architecture globale de l'application avec les deux phases coexistantes.}
+  \label{fig:architecture-globale}
+\end{figure}
+
+\subsection{Architecture détaillée de la phase SOAP}
+
+La phase SOAP, illustrée par la \figref{architecture-soap-phase}, met en relation un service d'authentification Java JAX-WS Metro et un service de chat Node.js fondé sur la bibliothèque node-soap. Ces deux services communiquent par échanges d'enveloppes SOAP transmises sur HTTP. Le service Node-soap consulte le service Java avant chaque opération pour résoudre l'identité de l'utilisateur à partir du jeton fourni.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/architecture-soap-phase.png}
+  \caption{Architecture détaillée de la phase SOAP.}
+  \label{fig:architecture-soap-phase}
+\end{figure}
+
+\subsection{Architecture détaillée de la phase REST}
+
+La phase REST, présentée dans la \figref{architecture-rest-phase}, repose sur un service d'authentification Java Jersey avec serveur embarqué Grizzly, et un service de chat Python Flask. Le service Python intercepte chaque requête authentifiée par un décorateur, lequel consulte le service Java au moyen d'une requête HTTP standard portant un en-tête \op{Authorization: Bearer}.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/architecture-rest-phase.png}
+  \caption{Architecture détaillée de la phase REST.}
+  \label{fig:architecture-rest-phase}
+\end{figure}
+
+\section{Modèle Conceptuel de Données}
+
+\subsection{Vue d'ensemble du modèle}
+
+Le modèle conceptuel de données, présente dans la \figref{mcd}, comprend quatre entités principales réparties dans deux groupes physiques distincts. Le premier groupe rassemble les entités \texttt{USER} et \texttt{SESSION}, qui constituent la sphère d'authentification. Le second groupe contient les entités \texttt{ROOM} et \texttt{MESSAGE}, qui constituent la sphère de discussion.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.95\linewidth]{figures/plantuml/mcd.png}
+  \caption{Modèle Conceptuel de Données : deux bases physiquement isolées par backend.}
+  \label{fig:mcd}
+\end{figure}
+
+\subsection{Détail des entités}
+
+L'entité \texttt{USER} représente un compte utilisateur. Elle conserve l'identifiant interne, le nom d'utilisateur unique, le hash du mot de passe généré par bcrypt, et la date de création du compte. L'entité \texttt{SESSION} représente un jeton de session valide. Elle utilise comme clé primaire le jeton lui-même, sous la forme d'une chaîne hexadécimale de soixante-quatre caractères tirée d'un générateur cryptographique. Elle stocke la référence vers le propriétaire ainsi qu'une date d'expiration, fixée à huit heures après la création.
+
+L'entité \texttt{ROOM} représente un salon de discussion. Outre son identifiant interne et son nom unique, elle conserve la référence de l'utilisateur qui l'a créé. L'entité \texttt{MESSAGE} représente un message publié. Son identifiant est de type \texttt{BIGSERIAL}, ce qui garantit une croissance monotone indépendante des fuseaux horaires des serveurs ; cette propriété sera exploitée par le mécanisme de polling. Elle contient la référence du salon, l'identifiant de l'auteur, son nom d'utilisateur, le contenu textuel et l'horodatage avec une précision à la milliseconde.
+
+\subsection{Isolation physique des deux sphères}
+
+Notre architecture comporte un choix structurant : les deux sphères ne partagent pas la même base de données. Pour la phase SOAP, l'authentification réside dans \texttt{chatroom\_auth\_soap} tandis que les conversations sont enregistrées dans \texttt{chatroom\_chat\_soap}. La phase REST utilise symétriquement les bases \texttt{chatroom\_auth\_rest} et \texttt{chatroom\_chat\_rest}. Ces quatre bases vivent dans une même instance PostgreSQL pour des raisons pratiques, mais elles sont physiquement et logiquement isolées.
+
+Cette décision n'est pas anodine. Elle traduit l'autonomie fonctionnelle des deux services : \service{ChatService} ne doit posséder aucun accès direct aux données d'authentification, et réciproquement. Cette séparation reproduit en miniature l'organisation réelle de nombreux systèmes distribués, où chaque service possède son propre stockage.
+
+\subsection{Conséquence : absence de clés étrangères inter-bases}
+
+PostgreSQL ne permet pas d'établir une contrainte de clé étrangère entre deux bases distinctes. Le champ \texttt{messages.user\_id} ne peut donc pas référencer physiquement la colonne \texttt{users.id}. Sans précaution, cette absence de contrainte ouvrirait la porte à des incohérences référentielles : un message pourrait conserver l'identifiant d'un utilisateur disparu, voire référencer un identifiant qui n'a jamais existé.
+
+\section{Liaison cohérente entre les deux bases}
+
+\subsection{Principe : la composition de services au service de l'intégrité}
+
+Notre solution à ce problème consiste à déplacer la garantie de cohérence du niveau base de données vers le niveau applicatif, en exploitant précisément la composition de services. Avant toute insertion dans la table \texttt{messages}, le \service{ChatService} interroge le \service{AuthService} pour résoudre le couple \texttt{(user\_id, username)} à partir du jeton fourni par le client. Si le jeton est invalide ou expiré, l'insertion n'a tout simplement pas lieu : le service répond par une exception. Cette validation préalable joue exactement le rôle que jouerait une contrainte de clé étrangère si les deux tables coexistaient dans une même base.
+
+\subsection{La dénormalisation du nom d'utilisateur}
+
+Une fois le couple résolu, le \service{ChatService} ne se contente pas d'enregistrer \texttt{user\_id}. Il duplique également le \texttt{username} dans la table \texttt{messages}. Cette dénormalisation, décrite comme un \emph{snapshot au moment de l'écriture}, présente deux avantages décisifs.
+
+D'une part, elle évite N appels réseau lors de la lecture des messages. Sans cette dénormalisation, chaque rendu d'historique exigerait, pour chaque message, une interrogation de \service{AuthService} afin de résoudre le nom d'utilisateur. La charge serait inacceptable.
+
+D'autre part, elle stabilise le rendu historique : même si un utilisateur renommait son compte ultérieurement, l'historique des messages conserverait le nom sous lequel il s'exprimait au moment de l'envoi. Cette propriété est conforme aux attentes naturelles dans une application de messagerie.
+
+\subsection{Séquence détaillée de la liaison}
+
+La \figref{liaison-bd-services} retrace pas à pas la séquence d'un envoi de message. Le frontend transmet le jeton et le contenu au \service{ChatService}, qui interroge le \service{AuthService} avant l'insertion. Une fois le couple résolu, l'insertion est réalisée avec \texttt{user\_id} et \texttt{username} conjointement. L'identifiant du message nouvellement créé est retourné au frontend pour synchronisation locale.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/liaison-bd-services.png}
+  \caption{Liaison cohérente entre les deux bases via appel inter-service.}
+  \label{fig:liaison-bd-services}
+\end{figure}
+
+\subsection{Interprétation théorique}
+
+Ce dispositif mérite une lecture conceptuelle. Nous transformons une \emph{contrainte de référence physique} en une \emph{contrainte de référence applicative}, médiée par un protocole de service Web. La cohérence est sacrifiée au niveau du stockage mais retablie au niveau du domaine, par une orchestration explicite. Cette approche, courante dans les architectures de microservices, illustre un principe central : la cohérence est un service, pas une propriété acquise.
+
+\section{Pattern Port et Adaptateurs côté frontend}
+
+\subsection{Justification du pattern}
+
+Une application web n'a aucune raison legitime de connaitre le protocole technique de ses services backend. La page d'envoi d'un message est concernee par le nom de l'utilisateur, par le contenu du texte, par l'identifiant du salon ; elle n'a pas à savoir si l'échange se déroulé en SOAP, en REST, ou par tout autre moyen. Le pattern hexagonal permet de matérialiser cette ignorance utile.
+
+\subsection{Structuré des classes}
+
+La \figref{classes-frontend-php} présente l'organisation des classes du frontend. Au centre, l'interface \texttt{ClientInterface} declare les huit opérations métier identifiées dans le cahier des charges. Deux implémentations concrètes coexistent : \texttt{SoapBackendClient} encapsule deux instances de \texttt{SoapClient} PHP, tandis que \texttt{RestBackendClient} encapsule des appels cURL avec en-tête \op{Authorization}. La fabrique \texttt{ClientFactory::make()} lit la variable d'environnement \code{BACKEND\_MODE} et instancie l'adapteur correspondant.
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figures/plantuml/classes-frontend-php.png}
+  \caption{Pattern Port et Adaptateurs côté frontend PHP.}
+  \label{fig:classes-frontend-php}
+\end{figure}
+
+\subsection{Benefices observés}
+
+L'adoption stricte de ce pattern produit deux bénéfices que nous mesurons dans le chapitre dédié aux tests. D'abord, le code des pages PHP est rigoureusement identique entre les deux phases : aucun \texttt{if} ne distingue SOAP de REST dans les contrôleurs. Ensuite, l'ajout d'un troisième protocole, par exemple gRPC, demanderait uniquement la création d'un nouvel adaptateur ; les pages applicatives n'auraient pas à être modifiées.
+
+\section{Choix technologiques}
+
+\subsection{PostgreSQL pour la persistance}
+
+Nous retenons PostgreSQL pour quatre raisons. D'abord, son respect strict des propriétés ACID garantit l'intégrité des transactions. Ensuite, son support natif des séquences monotones (\texttt{SERIAL} et \texttt{BIGSERIAL}) sert directement notre mécanisme de polling. Par ailleurs, sa disponibilite en image Docker facilite la mise en place de l'environnement de développement. Enfin, ses outils en ligne de commande, notamment \texttt{psql}, simplifient l'inspection des données pendant les tests.
+
+\subsection{Java pour les deux services d'authentification}
+
+Le service d'authentification est implémenté dans le même langage pour les deux phases, ce qui est volontaire. Cette unicité réduit la dispersion technologique sur la fonction la plus critique du système et permet de réutiliser la même bibliothèque jBCrypt pour le hashage des mots de passe. JAX-WS Metro pour la phase SOAP et Jersey pour la phase REST sont les implémentations de référence de Jakarta EE pour ces deux paradigmes \citep{jaxws, jaxrs}.
+
+\subsection{Node.js et Python pour les services de chat}
+
+A l'inversé, le service de chat diffère entre les deux phases : Node.js pour SOAP, Python pour REST. Ce choix introduit la polyglossie souhaitée. La bibliothèque node-soap \citep{nodesoap} permet de définir un service SOAP en quelques lignes sur la base d'un WSDL. Le micro-framework Flask \citep{flask} se prête naturellement à une API REST minimaliste avec négociation de contenu.
+
+\subsection{PHP pour le frontend}
+
+PHP a été choisi pour le frontend en raison de la disponibilite native de l'extension \texttt{ext-soap} et de l'extension \texttt{ext-curl}. Cette double disponibilite permet d'implémenter les deux adapteurs sans dépendance externe complémentaire. Par ailleurs, l'usage du serveur de développement intégré \texttt{php -S} élimine toute friction de mise en place.
+
+\section{Synthèse}
+
+Au terme de cette analyse, nous disposons d'une vision claire de l'application à développer, de son architecture, de son modèle de données, du mécanisme par lequel nous garantissons la cohérence inter-bases sans clé étrangère physique, et de l'organisation hexagonale du frontend. Le chapitre suivant traduit ces choix en code source exécutable.

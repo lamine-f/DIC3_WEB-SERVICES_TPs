@@ -1,0 +1,883 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project name="Chatroom-SOAP" soapui-version="5.9.1" resourceRoot="" id="00000000-0000-0000-0001-000000000000" abortOnError="false" runType="SEQUENTIAL" activeEnvironment="Default" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings/>
+
+  <!-- ============================================================ -->
+  <!-- INTERFACE 1 : AuthService (Java JAX-WS Metro, port 9001)    -->
+  <!-- ============================================================ -->
+  <con:interface xsi:type="con:WsdlInterface" name="AuthService" bindingName="{http://chatroom.dic3/auth}AuthServiceImplPortBinding" soapVersion="1_1" definition="http://localhost:9001/auth?wsdl" wsaVersion="NONE" id="00000000-0000-0000-0002-000000000001" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <con:settings/>
+    <con:endpoints>
+      <con:endpoint>http://localhost:9001/auth</con:endpoint>
+    </con:endpoints>
+    <con:operation name="register" bindingOperationName="register" type="Request-Response" isOneWay="false" sendsAttachments="false" receivesAttachments="false" inputName="" action="" id="00000000-0000-0000-0003-000000000001">
+      <con:settings/>
+      <con:call name="Sample - register" id="00000000-0000-0000-0004-000000000001">
+        <con:settings/>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>http://localhost:9001/auth</con:endpoint>
+        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:register>
+      <username>alice</username>
+      <password>secret</password>
+    </auth:register>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+        <con:credentials>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:jmsPropertyConfig/>
+        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+        <con:wsrmConfig version="1.2"/>
+      </con:call>
+    </con:operation>
+    <con:operation name="login" bindingOperationName="login" type="Request-Response" isOneWay="false" sendsAttachments="false" receivesAttachments="false" inputName="" action="" id="00000000-0000-0000-0003-000000000002">
+      <con:settings/>
+      <con:call name="Sample - login" id="00000000-0000-0000-0004-000000000002">
+        <con:settings/>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>http://localhost:9001/auth</con:endpoint>
+        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:login>
+      <username>alice</username>
+      <password>secret</password>
+    </auth:login>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+        <con:credentials>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:jmsPropertyConfig/>
+        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+        <con:wsrmConfig version="1.2"/>
+      </con:call>
+    </con:operation>
+    <con:operation name="logout" bindingOperationName="logout" type="Request-Response" isOneWay="false" sendsAttachments="false" receivesAttachments="false" inputName="" action="" id="00000000-0000-0000-0003-000000000003">
+      <con:settings/>
+      <con:call name="Sample - logout" id="00000000-0000-0000-0004-000000000003">
+        <con:settings/>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>http://localhost:9001/auth</con:endpoint>
+        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:logout>
+      <token>?</token>
+    </auth:logout>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+        <con:credentials>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:jmsPropertyConfig/>
+        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+        <con:wsrmConfig version="1.2"/>
+      </con:call>
+    </con:operation>
+    <con:operation name="validateToken" bindingOperationName="validateToken" type="Request-Response" isOneWay="false" sendsAttachments="false" receivesAttachments="false" inputName="" action="" id="00000000-0000-0000-0003-000000000004">
+      <con:settings/>
+      <con:call name="Sample - validateToken" id="00000000-0000-0000-0004-000000000004">
+        <con:settings/>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>http://localhost:9001/auth</con:endpoint>
+        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:validateToken>
+      <token>?</token>
+    </auth:validateToken>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+        <con:credentials>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:jmsPropertyConfig/>
+        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+        <con:wsrmConfig version="1.2"/>
+      </con:call>
+    </con:operation>
+    <con:definitionCache type="TEXT" rootPart=""/>
+  </con:interface>
+
+  <!-- ============================================================ -->
+  <!-- INTERFACE 2 : ChatService (Node.js node-soap, port 9002)    -->
+  <!-- ============================================================ -->
+  <con:interface xsi:type="con:WsdlInterface" name="ChatService" bindingName="{http://chatroom.dic3/chat}ChatServiceBinding" soapVersion="1_1" definition="http://localhost:9002/chat?wsdl" wsaVersion="NONE" id="00000000-0000-0000-0002-000000000002" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <con:settings/>
+    <con:endpoints>
+      <con:endpoint>http://localhost:9002/chat</con:endpoint>
+    </con:endpoints>
+    <con:operation name="createRoom" bindingOperationName="createRoom" type="Request-Response" isOneWay="false" sendsAttachments="false" receivesAttachments="false" inputName="" action="createRoom" id="00000000-0000-0000-0003-000000000005">
+      <con:settings/>
+      <con:call name="Sample - createRoom" id="00000000-0000-0000-0004-000000000005">
+        <con:settings/>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>http://localhost:9002/chat</con:endpoint>
+        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:createRoom>
+      <token>?</token>
+      <name>general</name>
+    </chat:createRoom>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+        <con:credentials>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:jmsPropertyConfig/>
+        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+        <con:wsrmConfig version="1.2"/>
+      </con:call>
+    </con:operation>
+    <con:operation name="listRooms" bindingOperationName="listRooms" type="Request-Response" isOneWay="false" sendsAttachments="false" receivesAttachments="false" inputName="" action="listRooms" id="00000000-0000-0000-0003-000000000006">
+      <con:settings/>
+      <con:call name="Sample - listRooms" id="00000000-0000-0000-0004-000000000006">
+        <con:settings/>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>http://localhost:9002/chat</con:endpoint>
+        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:listRooms>
+      <token>?</token>
+    </chat:listRooms>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+        <con:credentials>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:jmsPropertyConfig/>
+        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+        <con:wsrmConfig version="1.2"/>
+      </con:call>
+    </con:operation>
+    <con:operation name="sendMessage" bindingOperationName="sendMessage" type="Request-Response" isOneWay="false" sendsAttachments="false" receivesAttachments="false" inputName="" action="sendMessage" id="00000000-0000-0000-0003-000000000007">
+      <con:settings/>
+      <con:call name="Sample - sendMessage" id="00000000-0000-0000-0004-000000000007">
+        <con:settings/>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>http://localhost:9002/chat</con:endpoint>
+        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:sendMessage>
+      <token>?</token>
+      <roomId>1</roomId>
+      <content>hello</content>
+    </chat:sendMessage>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+        <con:credentials>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:jmsPropertyConfig/>
+        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+        <con:wsrmConfig version="1.2"/>
+      </con:call>
+    </con:operation>
+    <con:operation name="getMessages" bindingOperationName="getMessages" type="Request-Response" isOneWay="false" sendsAttachments="false" receivesAttachments="false" inputName="" action="getMessages" id="00000000-0000-0000-0003-000000000008">
+      <con:settings/>
+      <con:call name="Sample - getMessages" id="00000000-0000-0000-0004-000000000008">
+        <con:settings/>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>http://localhost:9002/chat</con:endpoint>
+        <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:getMessages>
+      <token>?</token>
+      <roomId>1</roomId>
+      <sinceId>0</sinceId>
+    </chat:getMessages>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+        <con:credentials>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:jmsPropertyConfig/>
+        <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+        <con:wsrmConfig version="1.2"/>
+      </con:call>
+    </con:operation>
+    <con:definitionCache type="TEXT" rootPart=""/>
+  </con:interface>
+
+  <!-- ============================================================ -->
+  <!-- TESTSUITE 1 : AuthService — register / login / validate     -->
+  <!-- ============================================================ -->
+  <con:testSuite name="01 - AuthService" id="00000000-0000-0000-0005-000000000001">
+    <con:settings/>
+    <con:runType>SEQUENTIAL</con:runType>
+
+    <con:testCase name="Register alice" failOnError="false" failTestCaseOnErrors="false" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000001">
+      <con:description>Register tolere une fault USER_ALREADY_EXISTS (run #2+) — failOnError=false</con:description>
+      <con:settings/>
+      <con:testStep type="request" name="register alice" id="00000000-0000-0000-0007-000000000001">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>AuthService</con:interface>
+          <con:operation>register</con:operation>
+          <con:request name="register alice" id="00000000-0000-0000-0008-000000000001">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#authUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:register>
+      <username>${#Project#userAlice}</username>
+      <password>${#Project#passwordAlice}</password>
+    </auth:register>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000001"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="Register bob" failOnError="false" failTestCaseOnErrors="false" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000002">
+      <con:settings/>
+      <con:testStep type="request" name="register bob" id="00000000-0000-0000-0007-000000000002">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>AuthService</con:interface>
+          <con:operation>register</con:operation>
+          <con:request name="register bob" id="00000000-0000-0000-0008-000000000002">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#authUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:register>
+      <username>${#Project#userBob}</username>
+      <password>${#Project#passwordBob}</password>
+    </auth:register>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000002"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="Login alice" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000003">
+      <con:settings/>
+      <con:testStep type="request" name="login alice" id="00000000-0000-0000-0007-000000000003">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>AuthService</con:interface>
+          <con:operation>login</con:operation>
+          <con:request name="login alice" id="00000000-0000-0000-0008-000000000003">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#authUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:login>
+      <username>${#Project#userAlice}</username>
+      <password>${#Project#passwordAlice}</password>
+    </auth:login>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000003"/>
+            <con:assertion type="Not SOAP Fault Assertion" name="Not SOAP Fault" id="00000000-0000-0000-0009-000000000004"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:testStep type="transfer" name="extract tokenAlice" id="00000000-0000-0000-0007-000000000004">
+        <con:settings/>
+        <con:config xsi:type="con:PropertyTransfersStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:transfers setNullOnMissingSource="true" transferTextContent="true" failOnError="true" ignoreEmpty="false" transferChildNodes="false" useXQuery="false" entitize="false">
+            <con:name>tokenAlice</con:name>
+            <con:sourceType>Response</con:sourceType>
+            <con:sourceStep>login alice</con:sourceStep>
+            <con:sourcePath>declare namespace soap='http://schemas.xmlsoap.org/soap/envelope/';
+declare namespace ns='http://chatroom.dic3/auth';
+//ns:loginResponse/return</con:sourcePath>
+            <con:targetType>tokenAlice</con:targetType>
+            <con:targetStep>#Project#</con:targetStep>
+          </con:transfers>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="Login bob" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000004">
+      <con:settings/>
+      <con:testStep type="request" name="login bob" id="00000000-0000-0000-0007-000000000005">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>AuthService</con:interface>
+          <con:operation>login</con:operation>
+          <con:request name="login bob" id="00000000-0000-0000-0008-000000000004">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#authUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:login>
+      <username>${#Project#userBob}</username>
+      <password>${#Project#passwordBob}</password>
+    </auth:login>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000005"/>
+            <con:assertion type="Not SOAP Fault Assertion" name="Not SOAP Fault" id="00000000-0000-0000-0009-000000000006"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:testStep type="transfer" name="extract tokenBob" id="00000000-0000-0000-0007-000000000006">
+        <con:settings/>
+        <con:config xsi:type="con:PropertyTransfersStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:transfers setNullOnMissingSource="true" transferTextContent="true" failOnError="true" ignoreEmpty="false" transferChildNodes="false" useXQuery="false" entitize="false">
+            <con:name>tokenBob</con:name>
+            <con:sourceType>Response</con:sourceType>
+            <con:sourceStep>login bob</con:sourceStep>
+            <con:sourcePath>declare namespace ns='http://chatroom.dic3/auth';
+//ns:loginResponse/return</con:sourcePath>
+            <con:targetType>tokenBob</con:targetType>
+            <con:targetStep>#Project#</con:targetStep>
+          </con:transfers>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="ValidateToken alice" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000005">
+      <con:settings/>
+      <con:testStep type="request" name="validate alice" id="00000000-0000-0000-0007-000000000007">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>AuthService</con:interface>
+          <con:operation>validateToken</con:operation>
+          <con:request name="validate alice" id="00000000-0000-0000-0008-000000000005">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#authUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:validateToken>
+      <token>${#Project#tokenAlice}</token>
+    </auth:validateToken>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000007"/>
+            <con:assertion type="Not SOAP Fault Assertion" name="Not SOAP Fault" id="00000000-0000-0000-0009-000000000008"/>
+            <con:assertion type="XPath Match" name="username = alice" id="00000000-0000-0000-0009-000000000009">
+              <con:configuration>
+                <path>declare namespace ns='http://chatroom.dic3/auth';
+//ns:validateTokenResponse/return/username/text()</path>
+                <content>${#Project#userAlice}</content>
+                <allowWildcards>false</allowWildcards>
+              </con:configuration>
+            </con:assertion>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="ValidateToken bidon (Fault attendu)" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000006">
+      <con:description>Test pedagogique : un token invalide doit declencher un SOAP Fault.</con:description>
+      <con:settings/>
+      <con:testStep type="request" name="validate bidon" id="00000000-0000-0000-0007-000000000008">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>AuthService</con:interface>
+          <con:operation>validateToken</con:operation>
+          <con:request name="validate bidon" id="00000000-0000-0000-0008-000000000006">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#authUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:validateToken>
+      <token>not-a-real-token</token>
+    </auth:validateToken>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Fault Assertion" name="SOAP Fault attendu" id="00000000-0000-0000-0009-000000000010"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:properties/>
+  </con:testSuite>
+
+  <!-- ============================================================ -->
+  <!-- TESTSUITE 2 : ChatService — rooms / messages                -->
+  <!-- ============================================================ -->
+  <con:testSuite name="02 - ChatService" id="00000000-0000-0000-0005-000000000002">
+    <con:description>Necessite que 01 - AuthService ait deja rempli tokenAlice et tokenBob.</con:description>
+    <con:settings/>
+    <con:runType>SEQUENTIAL</con:runType>
+
+    <con:testCase name="CreateRoom (alice)" failOnError="false" failTestCaseOnErrors="false" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000007">
+      <con:description>failOnError=false car ROOM_ALREADY_EXISTS au run #2+ est attendu.</con:description>
+      <con:settings/>
+      <con:testStep type="request" name="createRoom" id="00000000-0000-0000-0007-000000000009">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>ChatService</con:interface>
+          <con:operation>createRoom</con:operation>
+          <con:request name="createRoom" id="00000000-0000-0000-0008-000000000007">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#chatUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:createRoom>
+      <token>${#Project#tokenAlice}</token>
+      <name>${#Project#roomName}</name>
+    </chat:createRoom>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000011"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:testStep type="transfer" name="extract roomId" id="00000000-0000-0000-0007-000000000010">
+        <con:settings/>
+        <con:config xsi:type="con:PropertyTransfersStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:transfers setNullOnMissingSource="true" transferTextContent="true" failOnError="false" ignoreEmpty="true" transferChildNodes="false" useXQuery="false" entitize="false">
+            <con:name>roomId</con:name>
+            <con:sourceType>Response</con:sourceType>
+            <con:sourceStep>createRoom</con:sourceStep>
+            <con:sourcePath>declare namespace ns='http://chatroom.dic3/chat';
+//ns:createRoomResponse/room/id</con:sourcePath>
+            <con:targetType>roomId</con:targetType>
+            <con:targetStep>#Project#</con:targetStep>
+          </con:transfers>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="ListRooms (fallback roomId)" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000008">
+      <con:description>Si CreateRoom a renvoye un fault (room deja existante), ListRooms permet de recuperer le 1er roomId existant.</con:description>
+      <con:settings/>
+      <con:testStep type="request" name="listRooms" id="00000000-0000-0000-0007-000000000011">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>ChatService</con:interface>
+          <con:operation>listRooms</con:operation>
+          <con:request name="listRooms" id="00000000-0000-0000-0008-000000000008">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#chatUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:listRooms>
+      <token>${#Project#tokenAlice}</token>
+    </chat:listRooms>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000012"/>
+            <con:assertion type="Not SOAP Fault Assertion" name="Not SOAP Fault" id="00000000-0000-0000-0009-000000000013"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:testStep type="transfer" name="fallback roomId" id="00000000-0000-0000-0007-000000000012">
+        <con:settings/>
+        <con:config xsi:type="con:PropertyTransfersStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:transfers setNullOnMissingSource="false" transferTextContent="true" failOnError="false" ignoreEmpty="true" transferChildNodes="false" useXQuery="false" entitize="false">
+            <con:name>roomId si vide</con:name>
+            <con:sourceType>Response</con:sourceType>
+            <con:sourceStep>listRooms</con:sourceStep>
+            <con:sourcePath>declare namespace ns='http://chatroom.dic3/chat';
+(//ns:listRoomsResponse/room/id)[1]</con:sourcePath>
+            <con:targetType>roomId</con:targetType>
+            <con:targetStep>#Project#</con:targetStep>
+          </con:transfers>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="SendMessage alice" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000009">
+      <con:settings/>
+      <con:testStep type="request" name="sendMessage alice" id="00000000-0000-0000-0007-000000000013">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>ChatService</con:interface>
+          <con:operation>sendMessage</con:operation>
+          <con:request name="sendMessage alice" id="00000000-0000-0000-0008-000000000009">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#chatUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:sendMessage>
+      <token>${#Project#tokenAlice}</token>
+      <roomId>${#Project#roomId}</roomId>
+      <content>Salut depuis SoapUI ! ts=${=System.currentTimeMillis()}</content>
+    </chat:sendMessage>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000014"/>
+            <con:assertion type="Not SOAP Fault Assertion" name="Not SOAP Fault" id="00000000-0000-0000-0009-000000000015"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:testStep type="transfer" name="extract messageId" id="00000000-0000-0000-0007-000000000014">
+        <con:settings/>
+        <con:config xsi:type="con:PropertyTransfersStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:transfers setNullOnMissingSource="true" transferTextContent="true" failOnError="true" ignoreEmpty="false" transferChildNodes="false" useXQuery="false" entitize="false">
+            <con:name>messageId</con:name>
+            <con:sourceType>Response</con:sourceType>
+            <con:sourceStep>sendMessage alice</con:sourceStep>
+            <con:sourcePath>declare namespace ns='http://chatroom.dic3/chat';
+//ns:sendMessageResponse/messageId</con:sourcePath>
+            <con:targetType>messageId</con:targetType>
+            <con:targetStep>#Project#</con:targetStep>
+          </con:transfers>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="GetMessages bob (sinceId=0)" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000010">
+      <con:settings/>
+      <con:testStep type="request" name="getMessages bob" id="00000000-0000-0000-0007-000000000015">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>ChatService</con:interface>
+          <con:operation>getMessages</con:operation>
+          <con:request name="getMessages bob" id="00000000-0000-0000-0008-000000000010">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#chatUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:getMessages>
+      <token>${#Project#tokenBob}</token>
+      <roomId>${#Project#roomId}</roomId>
+      <sinceId>0</sinceId>
+    </chat:getMessages>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000016"/>
+            <con:assertion type="Not SOAP Fault Assertion" name="Not SOAP Fault" id="00000000-0000-0000-0009-000000000017"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:testStep type="transfer" name="update lastSinceId" id="00000000-0000-0000-0007-000000000016">
+        <con:settings/>
+        <con:config xsi:type="con:PropertyTransfersStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:transfers setNullOnMissingSource="false" transferTextContent="true" failOnError="false" ignoreEmpty="true" transferChildNodes="false" useXQuery="false" entitize="false">
+            <con:name>lastSinceId = max(id)</con:name>
+            <con:sourceType>Response</con:sourceType>
+            <con:sourceStep>getMessages bob</con:sourceStep>
+            <con:sourcePath>declare namespace ns='http://chatroom.dic3/chat';
+max(//ns:getMessagesResponse/message/id)</con:sourcePath>
+            <con:targetType>lastSinceId</con:targetType>
+            <con:targetStep>#Project#</con:targetStep>
+          </con:transfers>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="SendMessage bob (reponse)" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000011">
+      <con:settings/>
+      <con:testStep type="request" name="sendMessage bob" id="00000000-0000-0000-0007-000000000017">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>ChatService</con:interface>
+          <con:operation>sendMessage</con:operation>
+          <con:request name="sendMessage bob" id="00000000-0000-0000-0008-000000000011">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#chatUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:sendMessage>
+      <token>${#Project#tokenBob}</token>
+      <roomId>${#Project#roomId}</roomId>
+      <content>Yo Alice, recu 5/5 !</content>
+    </chat:sendMessage>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000019"/>
+            <con:assertion type="Not SOAP Fault Assertion" name="Not SOAP Fault" id="00000000-0000-0000-0009-000000000020"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="GetMessages alice (polling)" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000012">
+      <con:description>Polling : recupere uniquement les messages depuis lastSinceId (le pong de Bob).</con:description>
+      <con:settings/>
+      <con:testStep type="request" name="getMessages alice" id="00000000-0000-0000-0007-000000000018">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>ChatService</con:interface>
+          <con:operation>getMessages</con:operation>
+          <con:request name="getMessages alice" id="00000000-0000-0000-0008-000000000012">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#chatUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:getMessages>
+      <token>${#Project#tokenAlice}</token>
+      <roomId>${#Project#roomId}</roomId>
+      <sinceId>${#Project#lastSinceId}</sinceId>
+    </chat:getMessages>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000021"/>
+            <con:assertion type="Not SOAP Fault Assertion" name="Not SOAP Fault" id="00000000-0000-0000-0009-000000000022"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:properties/>
+  </con:testSuite>
+
+  <!-- ============================================================ -->
+  <!-- TESTSUITE 3 : Logout (fin de scenario)                      -->
+  <!-- ============================================================ -->
+  <con:testSuite name="03 - Logout" id="00000000-0000-0000-0005-000000000003">
+    <con:settings/>
+    <con:runType>SEQUENTIAL</con:runType>
+
+    <con:testCase name="Logout alice" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000013">
+      <con:settings/>
+      <con:testStep type="request" name="logout alice" id="00000000-0000-0000-0007-000000000019">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>AuthService</con:interface>
+          <con:operation>logout</con:operation>
+          <con:request name="logout alice" id="00000000-0000-0000-0008-000000000013">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#authUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:logout>
+      <token>${#Project#tokenAlice}</token>
+    </auth:logout>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000023"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:testCase name="Logout bob" failOnError="true" failTestCaseOnErrors="true" keepSession="false" searchProperties="true" maxResults="0" id="00000000-0000-0000-0006-000000000014">
+      <con:settings/>
+      <con:testStep type="request" name="logout bob" id="00000000-0000-0000-0007-000000000020">
+        <con:settings/>
+        <con:config xsi:type="con:RequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+          <con:interface>AuthService</con:interface>
+          <con:operation>logout</con:operation>
+          <con:request name="logout bob" id="00000000-0000-0000-0008-000000000014">
+            <con:settings/>
+            <con:encoding>UTF-8</con:encoding>
+            <con:endpoint>${#Project#authUrl}</con:endpoint>
+            <con:request><![CDATA[<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:auth="http://chatroom.dic3/auth">
+  <soap:Header/>
+  <soap:Body>
+    <auth:logout>
+      <token>${#Project#tokenBob}</token>
+    </auth:logout>
+  </soap:Body>
+</soap:Envelope>]]></con:request>
+            <con:assertion type="SOAP Response" name="SOAP Response" id="00000000-0000-0000-0009-000000000024"/>
+            <con:credentials>
+              <con:authType>No Authorization</con:authType>
+            </con:credentials>
+            <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+            <con:jmsPropertyConfig/>
+            <con:wsaConfig mustUnderstand="NONE" version="200508"/>
+            <con:wsrmConfig version="1.2"/>
+          </con:request>
+        </con:config>
+      </con:testStep>
+      <con:properties/>
+    </con:testCase>
+
+    <con:properties/>
+  </con:testSuite>
+
+  <!-- ============================================================ -->
+  <!-- PROJECT PROPERTIES (variables reutilisables)                -->
+  <!-- ============================================================ -->
+  <con:properties>
+    <con:property>
+      <con:name>authUrl</con:name>
+      <con:value>http://localhost:9001/auth</con:value>
+    </con:property>
+    <con:property>
+      <con:name>chatUrl</con:name>
+      <con:value>http://localhost:9002/chat</con:value>
+    </con:property>
+    <con:property>
+      <con:name>userAlice</con:name>
+      <con:value>alice</con:value>
+    </con:property>
+    <con:property>
+      <con:name>passwordAlice</con:name>
+      <con:value>secret</con:value>
+    </con:property>
+    <con:property>
+      <con:name>userBob</con:name>
+      <con:value>bob</con:value>
+    </con:property>
+    <con:property>
+      <con:name>passwordBob</con:name>
+      <con:value>secret</con:value>
+    </con:property>
+    <con:property>
+      <con:name>tokenAlice</con:name>
+      <con:value></con:value>
+    </con:property>
+    <con:property>
+      <con:name>tokenBob</con:name>
+      <con:value></con:value>
+    </con:property>
+    <con:property>
+      <con:name>roomName</con:name>
+      <con:value>general-soapui</con:value>
+    </con:property>
+    <con:property>
+      <con:name>roomId</con:name>
+      <con:value></con:value>
+    </con:property>
+    <con:property>
+      <con:name>messageId</con:name>
+      <con:value></con:value>
+    </con:property>
+    <con:property>
+      <con:name>lastSinceId</con:name>
+      <con:value>0</con:value>
+    </con:property>
+  </con:properties>
+</con:soapui-project>

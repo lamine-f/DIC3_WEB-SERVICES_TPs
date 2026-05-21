@@ -1,0 +1,33 @@
+<!--
+  Operation : getMessages (ChatService Node.js)
+  Endpoint  : http://localhost:9002/chat
+  SOAPAction: "getMessages"
+  Namespace : http://chatroom.dic3/chat
+  Retour    : 0..N elements <message><id/><roomId/><userId/><username/><content/><createdAt/></message>
+  Fault     : ChatFault
+
+  Pattern polling (equivalent au frontend JS) :
+    1. Premier appel sinceId=0 -> recupere tout l'historique
+    2. Garder le max(id) dans property "lastSinceId"
+    3. Appels suivants sinceId=${#Project#lastSinceId} -> seulement les nouveaux
+
+  Assertion conseillee (verifie la livraison entre Alice et Bob) :
+    XPath Match : //message[id='${#Project#messageId}'] existe
+
+  Test curl :
+    curl -X POST http://localhost:9002/chat \
+      -H 'Content-Type: text/xml; charset=utf-8' \
+      -H 'SOAPAction: "getMessages"' \
+      -d @chat-get-messages.xml
+-->
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:getMessages>
+      <token>TOKEN_ICI</token>
+      <roomId>1</roomId>
+      <sinceId>0</sinceId>
+    </chat:getMessages>
+  </soap:Body>
+</soap:Envelope>

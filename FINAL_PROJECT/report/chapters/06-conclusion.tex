@@ -1,0 +1,25 @@
+\chapter*{Conclusion générale}
+\addcontentsline{toc}{chapter}{Conclusion générale}
+\markboth{Conclusion générale}{}
+
+Au terme de ce mémoire, nous tirons les enseignements d'un projet qui aura mobilise l'ensemble des notions étudiées au cours du semestre. Notre démarche est partie d'une question simple mais centrale : comment confronter rigoureusement les deux grands paradigmes de services Web, SOAP et REST, sur un cas métier identique ? Pour répondre, nous avons développé une application de chatroom distribuée, déclinée en deux phases iso-fonctionnelles, et consommee par un même frontend hexagonal.
+
+\section*{Bilan des objectifs}
+
+Les quatre objectifs pédagogiques fixés en introduction ont tous été atteints. La mise en oeuvre concrète des deux protocoles sur le même scénario nous a permis d'observer leurs différences au-delà des seuls textes de spécification. La composition de deux services autonomes, communiquant par le protocole de leur phase, a matérialisé la notion de \emph{cohérence applicative} en lieu et place d'une cohérence relationnelle classique. La cohabitation de Java, Node.js et Python a vérifie l'interopérabilité réelle des standards. Enfin, le pattern hexagonal a tenu sa promesse : la bascule entre les deux backends s'effectue par une simple variable d'environnement, sans modification du code applicatif.
+
+\section*{Apports pédagogiques}
+
+Trois apports nous semblent particulièrement structurants pour la suite de notre formation.
+
+Le premier porte sur la conscience aiguë du couplage et du découplage. La conception du frontend nous a contraints à séparer rigoureusement l'intention métier de sa réalisation technique. Cette discipline, exigeante mais formatrice, s'applique bien au-delà du contexte des services Web.
+
+Le deuxième apport tient à la composition de services distribués. L'isolation physique des bases de données nous a obligés à transposer la cohérence référentielle au niveau du protocole. Cette transposition n'est pas anecdotique : elle préfigure les compromis quotidiens que l'on rencontre dans les architectures de microservices. Nous abordons désormais ces compromis en connaissance de cause.
+
+Le troisième apport concerne l'outillage. La maîtrise pratique de Postman et de SoapUI, ainsi que la production de scripts de test réutilisables, constitue un capital méthodologique exploitable dans tout projet futur impliquant des integrations distribuées.
+
+\section*{Ouvertures}
+
+Plusieurs prolongements naturels s'offrent à ce travail. L'introduction d'une troisième phase fondée sur gRPC permettrait de comparer trois paradigmes plutôt que deux, et d'aborder les notions de streaming bidirectionnel. La transition du polling vers WebSocket ou Server-Sent Events apporterait une dimension temps réel à l'application, plus conforme aux attentes contemporaines. Enfin, la sécurisation complète par TLS et l'introduction de quotas de débit rapprocheraient notre réalisation des standards d'une mise en production.
+
+Au-delà de ces évolutions techniques, ce projet aura surtout consolidé notre conviction que l'enseignement des services Web gagne à être pratique avant d'être théorique. La confrontation effective des paradigmes, dans le contexte d'une application réelle, éclaire les standards d'une lumière que ne peut atteindre la seule lecture des spécifications. Cette conviction guidera nos choix pédagogiques futurs autant que notre pratique professionnelle.

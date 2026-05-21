@@ -1,0 +1,58 @@
+@startuml architecture-globale
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam defaultFontName "Helvetica"
+
+title Architecture globale du système
+
+actor "Utilisateur" as user
+
+package "Couche présentation" {
+  [Frontend PHP\n(port 8000)] as frontend
+}
+
+package "Sélection du backend" {
+  node "ClientFactory::make()" as factory
+  note bottom of factory
+    Lecture de la variable
+    d'environnement BACKEND_MODE
+    au démarrage de PHP
+  end note
+}
+
+package "Phase 1 : SOAP" #LightBlue {
+  [AuthService\nJava JAX-WS Metro\nport 9001] as authSoap
+  [ChatService\nNode node-soap\nport 9002] as chatSoap
+}
+
+package "Phase 2 : REST" #LightGreen {
+  [AuthService\nJava Jersey + Grizzly\nport 8081] as authRest
+  [ChatService\nPython Flask\nport 8082] as chatRest
+}
+
+database "PostgreSQL 16\n(port 5432, Docker)" as pg {
+  frame "Bases isolées par phase" {
+    [chatroom_auth_soap]
+    [chatroom_chat_soap]
+    [chatroom_auth_rest]
+    [chatroom_chat_rest]
+  }
+}
+
+user --> frontend : HTTP\n(navigateur)
+frontend --> factory
+factory --> authSoap : si BACKEND_MODE=soap
+factory --> chatSoap : si BACKEND_MODE=soap
+factory --> authRest : si BACKEND_MODE=rest
+factory --> chatRest : si BACKEND_MODE=rest
+
+chatSoap --> authSoap : validateToken\n(SOAP sortant)
+chatRest --> authRest : GET /validate\n(REST sortant)
+
+authSoap --> pg
+chatSoap --> pg
+authRest --> pg
+chatRest --> pg
+
+@enduml

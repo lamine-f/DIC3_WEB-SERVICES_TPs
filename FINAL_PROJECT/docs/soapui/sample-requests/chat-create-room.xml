@@ -1,0 +1,30 @@
+<!--
+  Operation : createRoom (ChatService Node.js node-soap)
+  Endpoint  : http://localhost:9002/chat
+  SOAPAction: "createRoom"
+  Namespace : http://chatroom.dic3/chat
+  Retour    : <room><id>...</id><name>...</name><createdBy>...</createdBy></room>
+  Fault     : ChatFault (UNAUTHENTICATED si token invalide, ROOM_ALREADY_EXISTS si nom pris)
+
+  IMPORTANT : ChatService delegue la validation du token a AuthService Java
+  via un appel SOAP sortant (cf. soap/chat-service/src/authClient.js).
+  C'est la composition de services demonstration de ce TP.
+
+  WSDL : elementFormDefault="unqualified" -> les enfants ne sont PAS prefixes.
+
+  Test curl :
+    curl -X POST http://localhost:9002/chat \
+      -H 'Content-Type: text/xml; charset=utf-8' \
+      -H 'SOAPAction: "createRoom"' \
+      -d @chat-create-room.xml
+-->
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:chat="http://chatroom.dic3/chat">
+  <soap:Header/>
+  <soap:Body>
+    <chat:createRoom>
+      <token>TOKEN_ICI</token>
+      <name>general</name>
+    </chat:createRoom>
+  </soap:Body>
+</soap:Envelope>
