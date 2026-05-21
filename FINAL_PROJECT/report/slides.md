@@ -344,20 +344,7 @@ Chaque service SOAP du projet expose son WSDL ; voici les opérations qu'il rend
 
 # SOAP en action
 
-<div class="two-col">
-<div>
-
-- **14 cas de test** chaînés par Property Transfers
-- **23 assertions** vérifiées automatiquement
-- Inspection du **XML brut** (onglet Raw)
-
-</div>
-<div>
-
 ![](figures/soapui/soapui-runner.png)
-
-</div>
-</div>
 
 ---
 
@@ -449,23 +436,9 @@ curl -H 'Accept: application/xml' \
 
 ---
 
-# Postman en action
-
-<div class="two-col">
-<div>
-
-- Collection organisée par service
-- **28 requêtes** : JSON et XML pour chaque opération
-- Property Transfers automatiques (token, roomId, sinceId)
-- Rejouable via Runner ou **Newman CLI**
-
-</div>
-<div>
+# REST en action
 
 ![](figures/postman/postman-runner-result.png)
-
-</div>
-</div>
 
 ---
 
