@@ -253,6 +253,15 @@ La vue interroge le serveur toutes les **1,5 secondes** et utilise un curseur `s
 
 ---
 
+<!-- _class: title-page -->
+<!-- _paginate: false -->
+
+# Communication
+
+## Comment les services dialoguent
+
+---
+
 # SOAP : le contrat WSDL
 
 Un WSDL décrit publiquement un service SOAP en **cinq sections imbriquées** :
