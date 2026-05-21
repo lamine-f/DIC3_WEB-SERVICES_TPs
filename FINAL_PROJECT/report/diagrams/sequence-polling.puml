@@ -1,4 +1,4 @@
-@startuml séquence-polling
+@startuml sequence-polling
 !theme plain
 skinparam backgroundColor #FFFFFF
 

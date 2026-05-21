@@ -42,6 +42,6 @@ end note
 chatdb --> chat : message_id = 42
 
 chat --> front : 42
-front --> user : message envoye
+front --> user : message envoyé
 
 @enduml

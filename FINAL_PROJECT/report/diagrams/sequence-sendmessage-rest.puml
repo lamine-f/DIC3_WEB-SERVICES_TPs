@@ -1,4 +1,4 @@
-@startuml séquence-sendmessage-rest
+@startuml sequence-sendmessage-rest
 !theme plain
 skinparam backgroundColor #FFFFFF
 

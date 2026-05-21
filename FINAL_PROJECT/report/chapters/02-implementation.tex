@@ -1,0 +1,111 @@
+\section{Implémentation}
+
+Ce chapitre détaille la mise en oeuvre du projet. Nous présentons d'abord la stack retenue, puis l'implémentation des services par paradigme, et enfin le frontend qui consomme indifféremment les deux phases.
+
+\subsection{Stack technique}
+
+Le \autoref{tab:stack-versions} résume les composants techniques retenus, avec leur version exacte. Le choix d'unifier le langage Java pour les deux services d'authentification réduit la dispersion sur la fonction la plus critique, tandis que la diversité Node.js / Python pour les services de chat introduit la polyglossie souhaitée.
+
+\begin{table}[H]
+  \centering
+  \caption{Versions des composants techniques retenus.}
+  \label{tab:stack-versions}
+  \begin{tabularx}{\linewidth}{l X l}
+    \toprule
+    \textbf{Composant} & \textbf{Rôle} & \textbf{Version} \\
+    \midrule
+    PostgreSQL          & SGBD relationnel (Docker)               & 16 \\
+    Java JDK            & AuthService SOAP et REST                 & 21 \\
+    JAX-WS Metro        & SOAP côté Java                          & 4.0.2 \\
+    Jersey + Grizzly    & REST côté Java                          & 3.1.8 \\
+    Node.js / node-soap & ChatService SOAP                        & 20 / 1.1.6 \\
+    Python / Flask      & ChatService REST                        & 3.12 / 3.0.3 \\
+    PHP                 & Frontend                                 & 8.2+ \\
+    jBCrypt             & Hachage des mots de passe (cost 10)     & 0.4 \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Phase SOAP}
+
+\subsubsection{Service d'authentification Java}
+
+Le service d'authentification SOAP est écrit selon l'approche \emph{code-first}. Une interface annotée \texttt{@WebService} déclare les opérations exposées et Metro génère automatiquement le contrat WSDL au démarrage. Le \autoref{lst:auth-service-interface} en montre l'extrait essentiel.
+
+\begin{lstlisting}[language=Java, caption={Interface du service d'authentification SOAP.}, label=lst:auth-service-interface]
+@WebService(targetNamespace = "http://chatroom.dic3/auth", name = "AuthService")
+public interface AuthService {
+    @WebMethod
+    String login(@WebParam(name = "username") String username,
+                 @WebParam(name = "password") String password) throws AuthFault;
+
+    @WebMethod
+    TokenInfoDTO validateToken(@WebParam(name = "token") String token) throws AuthFault;
+    // register et logout omis
+}
+\end{lstlisting}
+
+L'implémentation s'appuie sur jBCrypt pour le hachage des mots de passe et sur \texttt{SecureRandom} pour générer des jetons hexadécimaux de soixante-quatre caractères stockés dans la table \texttt{sessions} avec un TTL de huit heures.
+
+\subsubsection{Service de chat Node.js}
+
+Le service de chat suit l'approche inverse : \emph{contract-first}. Le WSDL est rédigé à la main, puis node-soap implémente le service à partir de ce contrat. Le point notable de cette implémentation réside dans l'appel SOAP sortant qui valide chaque jeton auprès du service Java, illustré par le \autoref{lst:auth-client-node}.
+
+\begin{lstlisting}[language=JavaScript, caption={Appel SOAP sortant de ChatService Node vers AuthService Java.}, label=lst:auth-client-node]
+async function validateToken(token) {
+  const c = await soap.createClientAsync(process.env.AUTH_WSDL_URL);
+  const [resp] = await c.validateTokenAsync({ token });
+  return { userId: resp.return.userId, username: resp.return.username };
+}
+\end{lstlisting}
+
+Cette validation s'exécute avant chaque insertion dans la table \texttt{messages} et matérialise la liaison cohérente présentée au chapitre précédent.
+
+\subsection{Phase REST}
+
+\subsubsection{Service d'authentification Java Jersey}
+
+L'équivalent REST repose sur Jersey avec serveur embarqué Grizzly. La négociation de contenu, déclarative, autorise le service à répondre indifféremment en JSON ou en XML selon l'en-tête \op{Accept} du client. Le \autoref{lst:auth-resource-rest} expose la ressource.
+
+\begin{lstlisting}[language=Java, caption={Ressource REST avec négociation de contenu.}, label=lst:auth-resource-rest]
+@Path("/")
+@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+public class AuthResource {
+    @POST @Path("/login")
+    public TokenDTO login(CredentialsDTO body) { ... }
+
+    @GET @Path("/validate")
+    public TokenInfoDTO validate(@HeaderParam("Authorization") String authorization) { ... }
+}
+\end{lstlisting}
+
+JAXB sérialise automatiquement les DTO annotés \texttt{@XmlRootElement} dans le format adapté.
+
+\subsubsection{Service de chat Python Flask}
+
+Le service Python est structuré en \emph{blueprints} Flask. L'authentification est portée par un décorateur \texttt{@require\_auth} apposé sur chaque route protégée. Ce décorateur extrait le jeton de l'en-tête \op{Authorization}, délègue sa validation au service Java par un appel HTTP, et place le résultat dans l'objet \texttt{g.user}. La négociation de contenu est ici explicite : la fonction \texttt{render} inspecte l'objet \texttt{request.accept\_mimetypes} et choisit JSON par défaut ou XML via \texttt{xmltodict}.
+
+\subsection{Frontend PHP}
+
+Les huit opérations métier sont déclarées par l'interface \texttt{ClientInterface}. L'adaptateur \texttt{SoapBackendClient} encapsule deux instances de \texttt{SoapClient} ; chaque méthode du port se traduit par un appel SOAP, et les \texttt{SoapFault} sont reconvertis en \texttt{BackendException}. L'adaptateur \texttt{RestBackendClient} suit la même logique avec cURL et un en-tête \op{Authorization: Bearer}. La fabrique \texttt{ClientFactory::make()} lit la variable \code{BACKEND\_MODE} et instancie l'adaptateur approprié.
+
+\subsection{Séquences d'exécution}
+
+La \figref{sequence-sendmessage-rest} illustre le flux complet d'un envoi de message en phase REST, depuis le navigateur jusqu'à l'insertion en base, en passant par le middleware d'authentification et l'appel inter-service vers Jersey. La composition de services y est observable directement.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/sequence-sendmessage-rest.png}
+  \caption{Séquence d'un envoi de message en phase REST.}
+  \label{fig:sequence-sendmessage-rest}
+\end{figure}
+
+La livraison des messages au navigateur s'appuie sur une scrutation périodique, illustrée par la \figref{sequence-polling}. La variable locale \texttt{sinceId} sert de curseur monotone : chaque appel ne récupère que les messages dont l'identifiant est strictement supérieur à ce curseur, ce qui rend les itérations incrémentales et insensibles aux décalages d'horloge entre serveurs.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/sequence-polling.png}
+  \caption{Séquence du polling de messages côté navigateur (1,5 s).}
+  \label{fig:sequence-polling}
+\end{figure}

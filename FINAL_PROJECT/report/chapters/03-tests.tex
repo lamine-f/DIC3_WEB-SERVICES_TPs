@@ -1,0 +1,80 @@
+\section{Tests et validation}
+
+Nous rendons compte ici de la campagne de validation menée sur les deux phases. Postman a servi à tester l'API REST, SoapUI à éprouver les services SOAP. Chaque outil a été mobilisé selon deux angles : exécution unitaire de chaque opération et exécution chaînée d'un scénario complet reproduisant un parcours utilisateur réaliste.
+
+\subsection{Tests REST avec Postman}
+
+\subsubsection{Organisation de la collection}
+
+La collection \fpath{docs/postman/chatroom-rest.postman\_collection.json} est organisée par service. Un dossier rassemble les opérations de \service{AuthService}, un autre celles de \service{ChatService}. L'environnement \fpath{chatroom-rest.postman\_environment.json} déclare douze variables : les URL des services, les comptes de test, et des variables dynamiques (tokens, identifiant de salon, curseur de scrutation) remplies automatiquement par les scripts de test après chaque réponse.
+
+\subsubsection{Captures représentatives}
+
+La \figref{postman-runner} présente le résultat de l'exécution complète dans le \emph{Collection Runner}. Toutes les assertions sont satisfaites, confirmant la cohérence du parcours utilisateur de bout en bout.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\rule{0pt}{7cm}\rule{12cm}{0pt}}
+  \caption{Exécution complète de la collection Postman.}
+  \label{fig:postman-runner}
+\end{figure}
+
+Les figures \autoref{fig:postman-json} et \autoref{fig:postman-xml} illustrent la négociation de contenu : un même endpoint sert le format JSON ou le format XML selon la valeur de l'en-tête \op{Accept}.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \fbox{\rule{0pt}{5cm}\rule{6cm}{0pt}}
+    \caption{Format JSON.}
+    \label{fig:postman-json}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \fbox{\rule{0pt}{5cm}\rule{6cm}{0pt}}
+    \caption{Format XML.}
+    \label{fig:postman-xml}
+  \end{subfigure}
+  \caption{Négociation de contenu sur l'endpoint \op{GET /rooms}.}
+\end{figure}
+
+\subsection{Tests SOAP avec SoapUI}
+
+\subsubsection{Organisation du projet}
+
+Le projet \fpath{docs/soapui/chatroom-soap-soapui-project.xml} comprend deux interfaces correspondant aux services SOAP, ainsi que trois suites de tests : une pour \service{AuthService}, une pour \service{ChatService} et une dernière pour la déconnexion finale. Le chaînage entre les étapes du scénario repose sur six \emph{Property Transfers} qui extraient les jetons, l'identifiant de salon créé, l'identifiant du dernier message et le curseur de scrutation.
+
+\subsubsection{Captures représentatives}
+
+La \figref{soapui-runner} montre le résultat de l'exécution complète. Toutes les barres apparaissent en vert, signe que les vingt-trois assertions définies sont satisfaites.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\rule{0pt}{7cm}\rule{12cm}{0pt}}
+  \caption{Exécution complète des suites de tests dans SoapUI.}
+  \label{fig:soapui-runner}
+\end{figure}
+
+L'un des grands intérêts de SoapUI est sa capacité à exposer le trafic SOAP brut. La \figref{soapui-raw} présente l'enveloppe d'une requête \op{login} et celle de sa réponse, avec leurs en-têtes HTTP. Cette transparence facilite l'analyse et confirme la conformité aux contrats WSDL.
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \fbox{\rule{0pt}{5cm}\rule{6cm}{0pt}}
+    \caption{Enveloppe de la requête.}
+  \end{subfigure}\hfill
+  \begin{subfigure}[t]{0.48\linewidth}
+    \centering
+    \fbox{\rule{0pt}{5cm}\rule{6cm}{0pt}}
+    \caption{Enveloppe de la réponse.}
+  \end{subfigure}
+  \caption{Trafic SOAP brut pour l'opération \op{login}.}
+  \label{fig:soapui-raw}
+\end{figure}
+
+\subsection{Démonstration d'interopérabilité et bilan}
+
+Le test le plus probant de notre architecture consiste à interrompre volontairement le service d'authentification pendant que le service de chat reste actif. Le frontend continue d'afficher les messages déjà reçus, mais toute tentative d'envoi échoue avec une erreur d'authentification propre. Cette propagation contrôlée de l'erreur valide la composition de services : \service{ChatService} consulte systématiquement son pair avant chaque opération sensible et ne fait pas confiance à un jeton non vérifié.
+
+La bascule entre les deux backends, opérée par simple changement de la variable \code{BACKEND\_MODE} suivi d'un redémarrage du serveur PHP, complète cette validation : aucune ligne de code applicatif n'a été modifiée, et l'application offre la même expérience utilisateur quel que soit le protocole sous-jacent. Cette double démonstration confirme l'atteinte des objectifs énoncés en préambule : composition de services observable, polyglossie effective, pattern hexagonal éprouvé.

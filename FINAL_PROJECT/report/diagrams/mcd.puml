@@ -48,7 +48,7 @@ package "Base CHAT (chatroom_chat_{soap|rest})" #LightGreen {
 user ||--o{ session : "ouvre"
 room ||--o{ message : "contient"
 
-user .[#red,dashed]. message : "<<liaison logique applicative>>\nuser_id opaque\nresolu via validateToken"
+user .[#red,dashed]. message : "<<liaison logique applicative>>\nuser_id opaque\nrésolu via validateToken"
 user .[#red,dashed]. room : "<<liaison logique applicative>>\ncreated_by opaque"
 
 note bottom of message
@@ -70,7 +70,7 @@ note right of user
   physiquement isolées.
 
   Aucune clé étrangère physique
-  ne relié users.id a
+  ne relie users.id à
   messages.user_id : la cohérence
   est garantie par appel
   inter-service.

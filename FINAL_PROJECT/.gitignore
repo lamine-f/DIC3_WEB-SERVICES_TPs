@@ -32,9 +32,9 @@ report/*.synctex.gz
 report/*.toc
 report/chapters/*.aux
 
-# PDF compile (regenerable via `make`)
-# Commenter la ligne suivante si l'on souhaite versionner le PDF final
-report/main.pdf
+# PDF compile : versionne pour faciliter la distribution
+# (decommenter la ligne suivante pour ignorer le PDF a nouveau)
+# report/main.pdf
 
 # Diagrammes PNG generes depuis les sources PlantUML (.puml)
 report/figures/plantuml/*.png

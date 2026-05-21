@@ -1,0 +1,70 @@
+\section{Conception}
+
+Nous présentons dans ce chapitre la conception du projet, en partant du cahier des charges fonctionnel pour aboutir au modèle de données et à l'organisation hexagonale du frontend. L'accent est mis sur le mécanisme qui garantit la cohérence des données entre les deux bases d'un même backend, sans cle étrangère physique.
+
+\subsection{Cahier des charges fonctionnel}
+
+L'application réalisée est une chatroom textuelle multi-utilisateurs. Tout visiteur peut créer un compte, se connecter, rejoindre un salon de discussion existant, en créer de nouveaux, envoyer des messages et lire ceux des autres participants. Deux services autonomes prennent en charge le métier : \service{AuthService} expose les opérations \op{register}, \op{login}, \op{logout} et \op{validateToken} ; \service{ChatService} expose \op{createRoom}, \op{listRooms}, \op{sendMessage} et \op{getMessages}.
+
+La \figref{use-cases} synthétise ces interactions. Le diagramme distingue deux acteurs, le \emph{Visiteur} anonyme et l'\emph{Utilisateur authentifié}, et met en évidence par des relations \texttt{<<include>>} la sollicitation systématique de \op{validateToken} par chaque cas du \service{ChatService}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\linewidth]{figures/plantuml/use-cases.png}
+  \caption{Diagramme de cas d'utilisation de la chatroom.}
+  \label{fig:use-cases}
+\end{figure}
+
+\subsection{Architecture générale}
+
+Notre architecture comporte trois couches : un frontend PHP de présentation, deux services backend par phase, et une instance PostgreSQL pour la persistance. Les deux phases SOAP et REST coexistent dans une même topologie et sont sélectionnées par le frontend via la variable d'environnement \code{BACKEND\_MODE}. La \figref{architecture-globale} en donne la vue d'ensemble.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/architecture-globale.png}
+  \caption{Architecture globale avec les deux phases coexistantes.}
+  \label{fig:architecture-globale}
+\end{figure}
+
+\subsection{Modèle de données et liaison cohérente}
+
+\subsubsection{Modèle conceptuel}
+
+Le modèle conceptuel comprend quatre entités : \texttt{USER} et \texttt{SESSION} pour la sphère d'authentification, \texttt{ROOM} et \texttt{MESSAGE} pour la sphère de discussion. La \figref{mcd} les présente. Chaque sphère réside dans une base de données distincte : \texttt{chatroom\_auth\_*} pour l'authentification et \texttt{chatroom\_chat\_*} pour les messages, avec deux jeux complets pour les phases SOAP et REST.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\linewidth]{figures/plantuml/mcd.png}
+  \caption{Modèle conceptuel de données : deux bases isolées par backend.}
+  \label{fig:mcd}
+\end{figure}
+
+L'identifiant des messages est de type \texttt{BIGSERIAL} : sa croissance monotone permet au navigateur d'utiliser un curseur \texttt{sinceId} pour ne recevoir que les nouveaux messages lors du polling. Le champ \texttt{username} est dénormalisé dans la table \texttt{messages} pour épargner un appel inter-service à chaque lecture d'historique.
+
+\subsubsection{Absence de clé étrangère inter-bases}
+
+PostgreSQL n'autorise pas de contrainte de clé étrangère entre deux bases distinctes. Le champ \texttt{messages.user\_id} ne peut donc pas référencer physiquement \texttt{users.id}. Sans précaution, cette absence ouvrirait la porte à des incohérences référentielles. Notre solution consiste à déplacer la garantie de cohérence du niveau base de données vers le niveau applicatif, en exploitant la composition de services.
+
+Avant toute insertion dans la table \texttt{messages}, le \service{ChatService} interroge le \service{AuthService} pour résoudre le couple \texttt{(user\_id, username)} à partir du jeton fourni. Si le jeton est invalide ou expiré, l'insertion n'a pas lieu. Cette validation préalable joue le rôle qu'aurait joué une contrainte de clé étrangère si les deux tables coexistaient. La \figref{liaison-bd-services} retrace cette séquence.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{figures/plantuml/liaison-bd-services.png}
+  \caption{Liaison cohérente entre les deux bases via appel inter-service.}
+  \label{fig:liaison-bd-services}
+\end{figure}
+
+Ce dispositif transforme une \emph{contrainte de référence physique} en une \emph{contrainte de référence applicative}, médiatisée par un protocole de service Web. La cohérence est sacrifiée au niveau du stockage mais rétablie au niveau du domaine par une orchestration explicite. Cette transposition est centrale dans les architectures de microservices.
+
+\subsection{Pattern Port et Adaptateurs côté frontend}
+
+Le frontend PHP n'a aucune raison légitime de connaître le protocole technique de ses services backend. Le pattern \emph{hexagonal} permet de matérialiser cette ignorance. La \figref{classes-frontend-php} montre l'organisation des classes : l'interface \texttt{ClientInterface} déclare les huit opérations métier ; deux adaptateurs concrets l'implémentent, \texttt{SoapBackendClient} encapsulant deux \texttt{SoapClient} PHP et \texttt{RestBackendClient} encapsulant des appels cURL ; la fabrique \texttt{ClientFactory::make()} sélectionne l'adaptateur au démarrage selon \code{BACKEND\_MODE}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.8\linewidth]{figures/plantuml/classes-frontend-php.png}
+  \caption{Pattern Port et Adaptateurs côté frontend PHP.}
+  \label{fig:classes-frontend-php}
+\end{figure}
+
+Aucune ligne de code des pages applicatives ne distingue SOAP de REST. La bascule entre les deux phases passe exclusivement par la fabrique, ce qui valide concrètement le principe d'inversion de dépendance porté par le pattern.

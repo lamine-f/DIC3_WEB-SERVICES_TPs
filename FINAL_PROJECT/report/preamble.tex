@@ -1,46 +1,60 @@
 % =====================================================
-% PREAMBLE — packages et configuration
+%  Encodage et langue
 % =====================================================
-
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
-\usepackage{lmodern}
+
+% =====================================================
+%  Police (Helvetica sans-serif)
+% =====================================================
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
 \usepackage{microtype}
 
-% Mise en page
-\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.7cm, right=2.5cm]{geometry}
+% =====================================================
+%  Mise en page
+% =====================================================
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
 \usepackage{setspace}
-\onehalfspacing
+\setstretch{1.1}
+\setlength{\parskip}{10pt}
+\setlength{\parindent}{0pt}
 
-% Couleurs et figures
-\usepackage{xcolor}
-\definecolor{esp-blue}{HTML}{1F3A93}
-\definecolor{esp-green}{HTML}{1E824C}
-\definecolor{code-bg}{HTML}{F4F4F4}
-\definecolor{code-kw}{HTML}{0033B3}
-\definecolor{code-str}{HTML}{067D17}
-\definecolor{code-com}{HTML}{8C8C8C}
-
+% =====================================================
+%  Tableaux et figures
+% =====================================================
+\usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
-\captionsetup{font=small, labelfont=bf, labelsep=colon}
-
-% Tableaux
-\usepackage{tabularx}
 \usepackage{booktabs}
-\usepackage{longtable}
 \usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{tabularray}
+\UseTblrLibrary{booktabs,varwidth}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\captionsetup[table]{name=Tableau}
+\renewcommand{\tablename}{Tableau}
+\DefTblrTemplate{caption-tag}{default}{Tableau\hspace{0.25em}\thetable}
+\DefTblrTemplate{caption-tag}{normal}{Tableau\hspace{0.25em}\thetable}
+\SetTblrTemplate{caption-tag}{normal}
+\DefTblrTemplate{conthead-text}{default}{(suite)}
+\DefTblrTemplate{conthead-text}{normal}{(suite)}
+\SetTblrTemplate{conthead-text}{normal}
+\DefTblrTemplate{contfoot-text}{default}{Suite page suivante.}
+\DefTblrTemplate{contfoot-text}{normal}{Suite page suivante.}
+\SetTblrTemplate{contfoot-text}{normal}
 
-% Listings de code
+% =====================================================
+%  Listings (code) — avec support UTF-8 pour accents dans les commentaires
+% =====================================================
 \usepackage{listings}
-\lstdefinelanguage{XML}{
-  morestring=[s]{"}{"},
-  morecomment=[s]{<!--}{-->},
-  morekeywords={xmlns,version,encoding,targetNamespace,name,type,binding,location},
-  alsoletter={:},
-}
+
+% Langages non fournis nativement par listings
 \lstdefinelanguage{JavaScript}{
   keywords={break,case,catch,const,continue,debugger,default,delete,do,else,export,extends,finally,for,function,if,import,in,instanceof,let,new,return,super,switch,this,throw,try,typeof,var,void,while,with,yield,async,await},
   morecomment=[l]{//},
@@ -48,9 +62,10 @@
   morestring=[b]',
   morestring=[b]",
   morestring=[b]`,
+  sensitive=true,
 }
 \lstdefinelanguage{PHP}{
-  keywords={abstract,and,array,as,break,case,catch,class,clone,const,continue,declare,default,do,echo,else,elseif,empty,enddeclare,endfor,endforeach,endif,endswitch,endwhile,extends,final,finally,for,foreach,function,global,goto,if,implements,include,include_once,instanceof,interface,isset,list,namespace,new,null,or,print,private,protected,public,require,require_once,return,static,switch,throw,trait,try,unset,use,var,while,xor,yield,return,this,self,parent,true,false},
+  keywords={abstract,and,array,as,break,case,catch,class,clone,const,continue,declare,default,do,echo,else,elseif,empty,enddeclare,endfor,endforeach,endif,endswitch,endwhile,extends,final,finally,for,foreach,function,global,goto,if,implements,include,include_once,instanceof,interface,isset,list,namespace,new,null,or,print,private,protected,public,require,require_once,return,static,switch,throw,trait,try,unset,use,var,while,xor,yield,this,self,parent,true,false},
   sensitive=true,
   morecomment=[l]{//},
   morecomment=[l]{\#},
@@ -58,24 +73,29 @@
   morestring=[b]',
   morestring=[b]",
 }
+
+% =====================================================
+%  Palette de couleurs
+% =====================================================
+\usepackage{xcolor}
+\definecolor{zafVert}{RGB}{0,119,73}
+\definecolor{zafOr}{RGB}{255,184,28}
+\definecolor{zafNoir}{RGB}{0,0,0}
+\definecolor{zafRouge}{RGB}{222,56,49}
+\definecolor{zafBleu}{RGB}{0,20,137}
+\definecolor{zafGris}{RGB}{240,248,240}
+
 \lstset{
-  backgroundcolor=\color{code-bg},
   basicstyle=\ttfamily\small,
-  keywordstyle=\color{code-kw}\bfseries,
-  stringstyle=\color{code-str},
-  commentstyle=\color{code-com}\itshape,
-  numbers=left,
-  numberstyle=\tiny\color{gray},
-  numbersep=8pt,
-  breaklines=true,
-  showstringspaces=false,
+  backgroundcolor=\color{black!5},
   frame=single,
-  framerule=0pt,
-  framesep=6pt,
-  tabsize=2,
+  rulecolor=\color{black!25},
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{black!50},
+  numbers=left,
+  numberstyle=\tiny\color{black!40},
+  breaklines=true,
   captionpos=b,
-  abovecaptionskip=8pt,
-  belowcaptionskip=8pt,
   extendedchars=true,
   inputencoding=utf8,
   literate=%
@@ -93,34 +113,37 @@
     {Ç}{{\c{C}}}1 {Œ}{{\OE}}1
 }
 
-% Liens cliquables
-\usepackage{hyperref}
-\hypersetup{
-  colorlinks=true,
-  linkcolor=esp-blue,
-  citecolor=esp-blue,
-  urlcolor=esp-green,
-  pdftitle={Rapport FINAL\_PROJECT — Chatroom SOAP et REST},
-  pdfauthor={Mouhamed Lamine Faye Zeitune},
-}
-
-% Guillemets français
-\usepackage{csquotes}
-\MakeOuterQuote{"}
-
-% Bibliographie (biblatex avec biber non installe : on utilise natbib + bibtex)
-\usepackage[numbers,square]{natbib}
-
-% En-têtes et pieds de page
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\fancyhf{}
-\fancyhead[L]{\nouppercase{\leftmark}}
-\fancyhead[R]{\thepage}
-\renewcommand{\headrulewidth}{0.4pt}
+% =====================================================
+%  Liens hypertexte (discrets, niveaux de gris)
+% =====================================================
+\usepackage[colorlinks=true,
+            linkcolor=black,
+            urlcolor=black!70,
+            citecolor=black]{hyperref}
 
 % =====================================================
-% COMMANDES CUSTOM (cf. CLAUDE.md section 3)
+%  Bibliographie (natbib, requis par le style plainnat)
+% =====================================================
+\usepackage[numbers,square]{natbib}
+
+% =====================================================
+%  Titres de section et sous-section
+%  La classe article ne possède pas de niveau chapter.
+% =====================================================
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\normalsize\bfseries\color{zafVert}}
+  {\thesection}{0.6em}{}
+
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries}
+  {\thesubsection}{0.6em}{}
+
+\titlespacing*{\section}{0pt}{20pt}{8pt}
+\titlespacing*{\subsection}{0pt}{14pt}{6pt}
+
+% =====================================================
+%  Commandes custom utilisées dans les chapitres
 % =====================================================
 
 % Nom d'un service en italique petit cap
@@ -132,20 +155,18 @@
 % Chemin de fichier
 \newcommand{\fpath}[1]{\texttt{\detokenize{#1}}}
 
-% Extrait de code inline avec fond légèrement teinte
-\newcommand{\code}[1]{\colorbox{code-bg}{\texttt{\small #1}}}
+% Extrait de code inline avec fond légèrement teinté
+\newcommand{\code}[1]{\colorbox{black!5}{\texttt{\small #1}}}
 
-% Référence de figure typée
+% Référence typée vers une figure
 \newcommand{\figref}[1]{\autoref{fig:#1}}
-\newcommand{\tabref}[1]{\autoref{tab:#1}}
-\newcommand{\lstref}[1]{\autoref{lst:#1}}
 
-% Labels français pour autoref
+% Labels français pour autoref (article : pas de \chapter)
 \addto\extrasfrench{
   \def\figureautorefname{figure}
   \def\tableautorefname{tableau}
-  \def\chapterautorefname{chapitre}
   \def\sectionautorefname{section}
   \def\subsectionautorefname{sous-section}
+  \def\subsubsectionautorefname{sous-section}
 }
 \newcommand{\lstautorefname}{listing}

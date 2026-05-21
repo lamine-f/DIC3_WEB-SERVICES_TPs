@@ -1,0 +1,14 @@
+\section*{Préambule}
+\addcontentsline{toc}{section}{Préambule}
+
+\subsection*{Contexte du projet}
+
+Ce rapport accompagne le projet de fin de semestre du cours \emph{Web Services} de la troisième année du diplôme d'ingénieur de conception (DIC3) au département Génie Informatique de l'École Supérieure Polytechnique. Le projet, nommé \fpath{FINAL\_PROJECT}, prend la forme d'une chatroom distribuée mettant en oeuvre les deux paradigmes majeurs de services Web : SOAP et REST. La spécificité de notre réalisation tient à la confrontation directe de ces deux paradigmes sur un cas métier identique, complétée par une polyglossie technologique délibérée et par l'application du pattern \emph{Port et Adaptateurs} côté frontend.
+
+\subsection*{Objectifs}
+
+Le projet poursuit quatre objectifs pédagogiques. Premièrement, mettre en oeuvre les deux protocoles sur le même scénario fonctionnel afin de comparer concrètement leurs propriétés. Deuxièmement, composer deux services autonomes par phase qui communiquent entre eux via le protocole de la phase, en évitant tout couplage par la base de données. Troisièmement, démontrer l'interopérabilité réelle en faisant cohabiter trois langages : Java, Node.js et Python. Quatrièmement, appliquer le pattern hexagonal sur le frontend PHP afin de basculer entre les deux backends par simple changement d'une variable d'environnement.
+
+\subsection*{Plan du rapport}
+
+Le présent document s'organise en trois chapitres. Le premier expose la conception, depuis le cahier des charges fonctionnel jusqu'au modèle de données, en mettant l'accent sur le mécanisme de liaison cohérente entre les deux bases d'un même backend. Le deuxième détaille la mise en oeuvre par service, accompagnée des séquences d'exécution les plus représentatives. Le troisième présente la campagne de validation menée avec Postman pour la phase REST et SoapUI pour la phase SOAP, illustrée par des captures d'écran des échanges réels.

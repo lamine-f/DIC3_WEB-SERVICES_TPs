@@ -1,6 +1,6 @@
-# Rapport académique — FINAL_PROJECT
+# Rapport de projet — FINAL_PROJECT
 
-Mémoire LaTeX documentant le projet `FINAL_PROJECT` (chatroom distribuée SOAP + REST polyglotte). Style académique de fin d'études (L3/Master).
+Rapport LaTeX documentant le projet `FINAL_PROJECT` (chatroom distribuée SOAP + REST polyglotte). Format allégé de rapport de projet de fin de semestre (~20 pages), structuré en préambule + 3 chapitres techniques.
 
 ## Compilation
 
@@ -38,8 +38,8 @@ report/
 ├── main.tex                     # Document principal
 ├── preamble.tex                 # Packages et commandes custom
 ├── meta.tex                     # Auteur, titre, ecole
-├── chapters/                    # 7 chapitres en .tex
-├── diagrams/                    # 9 sources PlantUML
+├── chapters/                    # 1 préambule + 3 chapitres en .tex
+├── diagrams/                    # 7 sources PlantUML
 ├── figures/
 │   ├── plantuml/                # PNGs generes
 │   ├── postman/                 # Captures Postman (a fournir)
@@ -52,7 +52,7 @@ report/
 ## Verification orthographique
 
 ```bash
-make spell CHAP=chapters/02-conception.tex
+make spell CHAP=chapters/01-conception.tex
 ```
 
 ## Pour rediger un chapitre
