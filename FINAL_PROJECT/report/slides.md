@@ -193,7 +193,22 @@ Le cas pratique du cours : une chatroom en SOAP et en REST.
 
 # Modèle conceptuel de données
 
+<div class="two-col">
+<div>
+
+- Quatre entités principales
+- Deux sphères distinctes : authentification et discussion
+- Bases physiquement isolées par phase
+- Identifiants monotones pour le polling
+- Champ `username` dénormalisé dans les messages
+
+</div>
+<div>
+
 ![](figures/plantuml/mcd.png)
+
+</div>
+</div>
 
 ---
 
