@@ -6,13 +6,15 @@ Rapport LaTeX documentant le projet `FINAL_PROJECT` (chatroom distribuée SOAP +
 
 ```bash
 cd FINAL_PROJECT/report
-make            # construit diagrammes PlantUML + PDF complet
-make diagrams   # regenere uniquement les .png depuis les .puml
-make clean      # supprime les fichiers intermediaires LaTeX
-make distclean  # supprime aussi le PDF et les PNG
+make             # rapport : diagrammes PlantUML + main.pdf
+make diagrams    # regenere uniquement les .png depuis les .puml
+make slides      # presentation Marp -> slides.pdf
+make slides-serve # apercu interactif sur http://localhost:8080
+make clean       # supprime les fichiers intermediaires LaTeX
+make distclean   # supprime aussi les PDF et les PNG
 ```
 
-Sortie : `main.pdf` à la racine de `report/`.
+Sorties : `main.pdf` (rapport) et `slides.pdf` (presentation) a la racine de `report/`.
 
 ## Pre-requis
 
@@ -28,16 +30,22 @@ sudo apt install texlive-latex-base texlive-latex-recommended texlive-latex-extr
                  texlive-lang-french texlive-fonts-recommended plantuml
 ```
 
+Pour la presentation Marp :
+```bash
+npm install -g @marp-team/marp-cli
+```
+
 ## Structure
 
 ```
 report/
 ├── CLAUDE.md                    # Instructions de redaction (ton + contexte projet)
 ├── README.md                    # Ce fichier
-├── Makefile                     # Construction du PDF
-├── main.tex                     # Document principal
+├── Makefile                     # Construction PDF + slides
+├── main.tex                     # Document principal du rapport
 ├── preamble.tex                 # Packages et commandes custom
 ├── meta.tex                     # Auteur, titre, ecole
+├── slides.md                    # Presentation Marp (18 slides sobres)
 ├── chapters/                    # 1 préambule + 3 chapitres en .tex
 ├── diagrams/                    # 7 sources PlantUML
 ├── figures/

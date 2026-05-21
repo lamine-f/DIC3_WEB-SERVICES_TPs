@@ -5,7 +5,7 @@ DIAGRAMS  := $(wildcard diagrams/*.puml)
 DIAG_PNG  := $(patsubst diagrams/%.puml,figures/plantuml/%.png,$(DIAGRAMS))
 TEX_FILES := $(wildcard chapters/*.tex) $(MAIN).tex preamble.tex meta.tex
 
-.PHONY: all diagrams clean distclean spell
+.PHONY: all diagrams slides slides-serve clean distclean spell
 
 all: diagrams $(MAIN).pdf
 
@@ -30,6 +30,16 @@ spell:
 	@if [ -z "$(CHAP)" ]; then echo "Usage: make spell CHAP=chapters/XX.tex"; exit 1; fi
 	aspell --lang=fr-FR --mode=tex -c $(CHAP)
 
+## Compilation de la presentation Marp -> slides.pdf
+## Pre-requis : npm install -g @marp-team/marp-cli
+slides: $(DIAG_PNG) slides.md
+	marp slides.md --pdf --allow-local-files
+	@echo "==> Slides generees : slides.pdf"
+
+## Visualisation interactive de la presentation (http://localhost:8080)
+slides-serve:
+	marp slides.md --server --allow-local-files
+
 ## Nettoyage des fichiers intermediaires LaTeX
 clean:
 	rm -f $(MAIN).aux $(MAIN).log $(MAIN).toc $(MAIN).lof $(MAIN).lot \
@@ -39,5 +49,5 @@ clean:
 
 ## Nettoyage complet (PDF + PNG generes)
 distclean: clean
-	rm -f $(MAIN).pdf
+	rm -f $(MAIN).pdf slides.pdf
 	rm -rf figures/plantuml
