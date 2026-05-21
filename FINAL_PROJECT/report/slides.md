@@ -210,14 +210,14 @@ Les deux bases d'un même backend sont **physiquement isolées**. PostgreSQL n'a
 
 ---
 
-# Polling côté navigateur
+# Polling côté vue
 
 <div class="two-col">
 <div>
 
 ## Comment livrer les nouveaux messages en temps réel ?
 
-Le navigateur interroge le serveur toutes les **1,5 secondes** et utilise un curseur `sinceId` monotone pour ne recevoir que les messages plus récents.
+La vue interroge le serveur toutes les **1,5 secondes** et utilise un curseur `sinceId` monotone pour ne recevoir que les messages plus récents.
 
 </div>
 <div>

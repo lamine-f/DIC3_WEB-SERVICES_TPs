@@ -26,7 +26,7 @@ package "Phase 2 : REST" #LightGreen {
 
 database "Base de données\n(4 bases isolées par phase)" as pg
 
-user --> frontend : HTTP
+user --> frontend
 frontend --> factory
 factory --> chatSoap : si SOAP
 factory --> chatRest : si REST

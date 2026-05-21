@@ -3,9 +3,9 @@
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName "Helvetica"
 
-title Séquence du polling côté navigateur
+title Séquence du polling côté vue
 
-participant "Navigateur" as nav
+participant "Vue" as nav
 participant "Frontend" as front
 participant "ChatService" as chat
 database "Stockage\ndes messages" as db
@@ -32,7 +32,7 @@ end
 
 note over nav, db
   Le curseur sinceId est un identifiant
-  monotone : il garantit que le navigateur
+  monotone : il garantit que la vue
   ne saute jamais un message, même si
   les serveurs ont des horloges décalées.
 end note
