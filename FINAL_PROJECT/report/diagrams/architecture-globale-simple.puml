@@ -15,13 +15,13 @@ node "Fabrique de client" as factory
 package "Phase 1 : SOAP" #LightBlue {
   [ChatService\n(port 9002)] as chatSoap
   [AuthService\n(port 9001)] as authSoap
-  chatSoap -[hidden]r- authSoap
+  chatSoap -right-> authSoap : valide\nle jeton
 }
 
 package "Phase 2 : REST" #LightGreen {
   [ChatService\n(port 8082)] as chatRest
   [AuthService\n(port 8081)] as authRest
-  chatRest -[hidden]r- authRest
+  chatRest -right-> authRest : valide\nle jeton
 }
 
 database "Base de données\n(4 bases isolées par phase)" as pg
@@ -30,9 +30,6 @@ user --> frontend : HTTP
 frontend --> factory
 factory --> chatSoap : si SOAP
 factory --> chatRest : si REST
-
-chatSoap --> authSoap : valide\nle jeton
-chatRest --> authRest : valide\nle jeton
 
 authSoap --> pg
 chatSoap --> pg

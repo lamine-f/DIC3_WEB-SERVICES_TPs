@@ -175,7 +175,11 @@ Le cas pratique du cours : une chatroom en SOAP et en REST.
 <div class="two-col">
 <div>
 
-Pour répondre à cette problématique, nous partons sur une architecture comme celle-ci, où un même frontend dialogue avec deux jeux de services backend selon le protocole choisi.
+- Un même frontend pour deux protocoles
+- Deux jeux de services backend interchangeables
+- Validation du jeton à chaque opération
+- Bases de données isolées par phase
+- Bascule par variable d'environnement
 
 </div>
 <div>
