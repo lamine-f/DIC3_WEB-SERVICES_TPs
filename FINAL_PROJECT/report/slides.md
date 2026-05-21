@@ -148,7 +148,7 @@ Le cas pratique du cours : une chatroom en SOAP et en REST.
 
 ---
 
-# Qui fait quoi
+# Fonctionnalités
 
 <div class="two-col">
 <div>
