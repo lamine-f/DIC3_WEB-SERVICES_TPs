@@ -210,12 +210,6 @@ Les deux bases d'un même backend sont **physiquement isolées**. PostgreSQL n'a
 
 ---
 
-# La solution : composition de services
-
-![](figures/plantuml/liaison-bd-services.png)
-
----
-
 # Polling côté navigateur
 
 <div class="two-col">
