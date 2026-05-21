@@ -347,7 +347,6 @@ Chaque service SOAP du projet expose son WSDL ; voici les opérations qu'il rend
 <div class="two-col">
 <div>
 
-- Projet prêt à importer (`docs/soapui/`)
 - **14 cas de test** chaînés par Property Transfers
 - **23 assertions** vérifiées automatiquement
 - Inspection du **XML brut** (onglet Raw)
