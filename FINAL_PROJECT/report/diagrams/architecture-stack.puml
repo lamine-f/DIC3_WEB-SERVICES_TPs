@@ -16,7 +16,7 @@ skinparam nodesep 25
 
 actor "Utilisateur" as user
 
-[<$php>\nFrontend\nPHP 8.2] as frontend
+[<$php>\nFrontend\nPHP 8.2\nSoapClient + cURL] as frontend
 
 node "Fabrique de client" as factory
 
@@ -43,7 +43,7 @@ package "Bases de données" {
   }
 }
 
-user --> frontend
+user --> frontend : HTTP\n(navigateur)
 frontend --> factory
 factory --> chatSoap : si SOAP
 factory --> chatRest : si REST
