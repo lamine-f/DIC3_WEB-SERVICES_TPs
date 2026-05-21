@@ -342,7 +342,7 @@ Chaque service SOAP du projet expose son WSDL ; voici les opérations qu'il rend
 
 ---
 
-# SoapUI en action
+# SOAP en action
 
 <div class="two-col">
 <div>
